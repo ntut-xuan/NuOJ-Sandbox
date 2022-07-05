@@ -1,0 +1,11 @@
+[Unit]
+Description=NuOJ-Sandbox
+
+[Service]
+Type=simple
+ExecStart=/opt/nuoj_sandbox/nuoj_service.py
+Restart=always
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
