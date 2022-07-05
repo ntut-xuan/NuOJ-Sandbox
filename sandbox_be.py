@@ -118,7 +118,7 @@ def judge_route():
         checker_code = data["checker"]
         _, status = init(checker_code, Language.CPP.value, CodeType.CHECKER.value, box_id)
 
-    isolate.touch_text_file_by_file_name(open("./testlib.h", "r").read(), "testlib.h", box_id)
+    isolate.touch_text_file_by_file_name(open("/opt/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id)
 
     if execution_type == "C":
         result = compile(Language.CPP.value, CodeType.SUBMIT.value, box_id)
