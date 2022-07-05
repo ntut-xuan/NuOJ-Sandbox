@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 from flask import Flask, request, Response
 from sandbox_enum import CodeType, Language
 import isolate
