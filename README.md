@@ -14,6 +14,7 @@ NuOJ 所使用的沙盒系統，使用 POST 傳送程式碼與測資，不需要
 
 ```
 sudo apt-get install make
+wget https://raw.githubusercontent.com/ntut-xuan/NuOJ-Sandbox/main/Makefile
 sudo make
 ```
 
@@ -124,11 +125,15 @@ NuOJ-Sandbox 使用 JSON 格式的 Data 來進行操作，如下：
 為一序列，序列中的每個元素為一筆測試資料，例如：
 
 ```json
-testcase: ["2\n1 2", "3\n1 2 3", "4\n1 2 3 4"]
+{
+    testcase: ["2\n1 2", "3\n1 2 3", "4\n1 2 3 4"]
+}
 ```
 
 ```json
-testcase: ["2\n2 3 5\n2 3 6", "2\n2 4 4\n2 5 5"]
+{
+    testcase: ["2\n2 3 5\n2 3 6", "2\n2 4 4\n2 5 5"]
+}
 ```
 
 
