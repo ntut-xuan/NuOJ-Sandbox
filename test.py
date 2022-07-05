@@ -1,5 +1,6 @@
 import os
+import sys
 
-status = os.system('systemctl is-active --quiet nuoj-sandbox')
+status = os.system('sudo systemctl is-active --quiet nuoj-sandbox')
 print(status)
-exit(status)
+sys.exit(status)
