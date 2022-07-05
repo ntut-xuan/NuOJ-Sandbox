@@ -1,0 +1,22 @@
+name: Ubuntu 18.04
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Install
+      run: make install
+      
+    - name: Check NuOJ status
+      run: sudo python3 test.py

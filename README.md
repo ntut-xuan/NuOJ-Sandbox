@@ -126,13 +126,13 @@ NuOJ-Sandbox 使用 JSON 格式的 Data 來進行操作，如下：
 
 ```json
 {
-    testcase: ["2\n1 2", "3\n1 2 3", "4\n1 2 3 4"]
+    "testcase": ["2\n1 2", "3\n1 2 3", "4\n1 2 3 4"]
 }
 ```
 
 ```json
 {
-    testcase: ["2\n2 3 5\n2 3 6", "2\n2 4 4\n2 5 5"]
+    "testcase": ["2\n2 3 5\n2 3 6", "2\n2 4 4\n2 5 5"]
 }
 ```
 
