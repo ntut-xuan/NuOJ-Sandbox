@@ -1,10 +1,16 @@
+#!/usr/bin/env python3
 from flask import Flask, request, Response
 from sandbox_enum import CodeType, Language
 import isolate
 import json
+import threading
 import traceback
+import uuid
+from datetime import datetime
 
 app = Flask(__name__)
+
+result_map = {}
 
 def init(code, language, type, box_id, option=None):
     isolate.init_sandbox(box_id)
@@ -97,46 +103,82 @@ def judge(language, testcase, box_id, option=None):
     except Exception as e:
         print(traceback.format_exc())
         return (str(traceback.format_exc()), False)
+        
+@app.route("/result/<uuid>/", methods=["GET"])
+def result_return(uuid):
+    result = {"status": "OK", "result": result_map[uuid]}
+    return Response(json.dumps(result), mimetype="application/json")
 
 @app.route("/judge", methods=["POST"])
 def judge_route():
     data = json.loads(request.data.decode("utf-8"))
-    user_code = data["code"]
-    test_case = data["testcase"]
     execution_type = data["execution"]
     result = {}
+    option = data["option"]
     status = None
-    box_id = 0
 
-    _, status = init(user_code, Language.CPP.value, CodeType.SUBMIT.value, box_id)
-    
-    if "solution" in data:
-        solution_code = data["solution"]
-        _, status = init(solution_code, Language.CPP.value, CodeType.SOLUTION.value, box_id)
-    if "checker" in data:
-        checker_code = data["checker"]
-        _, status = init(checker_code, Language.CPP.value, CodeType.CHECKER.value, box_id)
+    tracker_id = str(uuid.uuid4())
 
-    isolate.touch_text_file_by_file_name(open("./testlib.h", "r").read(), "testlib.h", box_id)
+    def do_work(data, tracker_id):
+        user_code = data["code"]
+        test_case = data["testcase"]
+        execution_type = data["execution"]
+        box_id = 0
 
-    if execution_type == "C":
-        result = compile(Language.CPP.value, CodeType.SUBMIT.value, box_id)
-    elif execution_type == "E":
-        result = execute(Language.CPP.value, CodeType.SUBMIT.value, test_case, box_id)
-    elif execution_type == "J":
-        result = judge(Language.CPP.value, test_case, box_id)
-    
-    finish(box_id)
+        result_map[tracker_id] = {}
+        result_map[tracker_id]["flow"] = {}
+        result_map[tracker_id]["status"] = "Initing"
 
-    response = {"status": "OK", "type": execution_type}
+        _, status = init(user_code, Language.CPP.value, CodeType.SUBMIT.value, box_id)
+        
+        result_map[tracker_id]["flow"]["init_code"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        if "solution" in data:
+            solution_code = data["solution"]
+            _, status = init(solution_code, Language.CPP.value, CodeType.SOLUTION.value, box_id)
+            result_map[tracker_id]["flow"]["init_solution"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if "checker" in data:
+            checker_code = data["checker"]
+            _, status = init(checker_code, Language.CPP.value, CodeType.CHECKER.value, box_id)
+            result_map[tracker_id]["flow"]["init_checker"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        isolate.touch_text_file_by_file_name(open("/opt/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id)
+        result_map[tracker_id]["flow"]["touch_testlib"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        result_map[tracker_id]["status"] = "Running"
+        result_map[tracker_id]["flow"]["running"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        if execution_type == "C":
+            result = compile(Language.CPP.value, CodeType.SUBMIT.value, box_id)
+        elif execution_type == "E":
+            result = execute(Language.CPP.value, CodeType.SUBMIT.value, test_case, box_id)
+        elif execution_type == "J":
+            result = judge(Language.CPP.value, test_case, box_id)
+
+        result_map[tracker_id]["flow"]["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        result_map[tracker_id]["status"] = "Finished"
+        result_map[tracker_id]["result"]= result
+
+        finish(box_id)
+
+    if option["threading"]:
+        thread = threading.Thread(target=do_work, kwargs={'data': data, 'tracker_id': tracker_id})
+        thread.start()
+    else:
+        do_work(data, tracker_id)
+
+    response = {"status": "OK", "type": execution_type, "tracker_id": tracker_id}
     if(status == False):
         response["status"] = "Failed"
         response["message"] = result
-    else:
-        response["data"] = result
+
+    if not option["threading"]:
+        response["result"] = result_map[tracker_id]
+    
     return Response(json.dumps(response), mimetype="application/json")
 
 
 if __name__ == "__main__":
     app.debug = True
-    app.run(host="0.0.0.0", port=3355)
+    app.run(host="0.0.0.0", port=3355, threaded=True)
