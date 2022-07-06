@@ -26,7 +26,7 @@ sudo make
 | :----------: | :--: |
 | Ubuntu 22.04 |  ✅   |
 | Ubuntu 20.04 |  ✅   |
-| Ubuntu 18.04 |  ✅   |
+| Ubuntu 18.04 |  暫時不行   |
 
 
 
@@ -75,6 +75,7 @@ NuOJ-Sandbox 使用 JSON 格式的 Data 來進行操作，如下：
 	"solution": "...",
 	"checker": "...",
 	"execution": "...",
+	"option": {},
 	"testcase": [
 		"<testcase1>",
 		"<testcase2>"
@@ -136,15 +137,22 @@ NuOJ-Sandbox 使用 JSON 格式的 Data 來進行操作，如下：
 }
 ```
 
+#### Option
 
+為一字典，用來設定選項。
+
+##### threading
+
+用來設定是否要創立執行緒來執行，若為 `False` 則 POST 會需要等評測結束後才會得到結果，會花較長的時間。
+若 `True` 則 POST 會回傳是否 POST 成功，評測結果需要由 /result/<tracker_ID> 來得到結果。
 
 ### POST Data Require
 
-| 操作 |        code        |      solution      |      checker       |     execution      |      testcase      |
-| :--: | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: |
-| 評測 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| 執行 | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: | :white_check_mark: |
-| 編譯 | :white_check_mark: |                    |                    | :white_check_mark: |                    |
+| 操作 |        code        |      solution      |      checker       |     execution      |      testcase      |      option        |
+| :--: | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: |
+| 評測 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | 
+| 執行 | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: | 
+| 編譯 | :white_check_mark: |                    |                    | :white_check_mark: |                    | :white_check_mark: | 
 
 
 
