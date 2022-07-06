@@ -1,6 +1,5 @@
 import os
 import sys
-<<<<<<< HEAD
 import requests
 import json
 
@@ -34,9 +33,3 @@ for data in response_data["result"]["result"]["report"]:
 
 print("sandbox test passed.")
 sys.exit(0)
-=======
-
-status = os.system('sudo systemctl is-active --quiet nuoj-sandbox')
-print(status)
-sys.exit(status)
->>>>>>> 4a701932692c015ed704a10ecee43f51fb59a91e
