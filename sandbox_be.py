@@ -119,11 +119,15 @@ def judge_route():
 
     tracker_id = str(uuid.uuid4())
 
+<<<<<<< HEAD
     def do_work(data, tracker_id):
         user_code = data["code"]
         test_case = data["testcase"]
         execution_type = data["execution"]
         box_id = 0
+=======
+    isolate.touch_text_file_by_file_name(open("/opt/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id)
+>>>>>>> 4a701932692c015ed704a10ecee43f51fb59a91e
 
         result_map[tracker_id] = {}
         result_map[tracker_id]["flow"] = {}
