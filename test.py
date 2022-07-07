@@ -19,7 +19,7 @@ def service_test():
 # Check Sandbox heartbeat
 def service_heartbeat_test():
     try:
-        link = "http://localhost:3355/heartbeat"
+        link = "http://127.0.0.1:3355/heartbeat"
         req = requests.get(link)
         response_data = json.loads(req.text)
         print("heartbeat test passed.")
@@ -31,7 +31,7 @@ def service_heartbeat_test():
 # Check Sandbox working correctly.
 def sandbox_test():
     try:
-        link = "http://localhost:3355/judge"
+        link = "http://127.0.0.1:3355/judge"
         post_data = {"code": open("./example_code/code.cpp", "r").read(),
                     "solution": open("./example_code/solution.cpp", "r").read(),
                     "checker": open("./example_code/checker.cpp", "r").read(), "testcase": [], "execution": "J", "option": {"threading": False}}

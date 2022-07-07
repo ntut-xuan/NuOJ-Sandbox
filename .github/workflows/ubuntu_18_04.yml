@@ -18,5 +18,8 @@ jobs:
     - name: Install
       run: make install
       
-    - name: Check NuOJ status
+    - name: NuOJ Sandbox Status
+      run: sudo systemctl status nuoj-sandbox
+
+    - name: NuOJ Sandbox Test
       run: sudo python3 test.py
