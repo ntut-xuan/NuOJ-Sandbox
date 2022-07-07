@@ -19,7 +19,7 @@ def service_test():
 def service_heartbeat_test():
     try:
         link = "http://localhost:3355/heartbeat"
-        req = requests.post(link)
+        req = requests.get(link)
         response_data = json.loads(req.text)
         print("heartbeat test passed.")
     except Exception as e:
