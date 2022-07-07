@@ -26,7 +26,7 @@ sudo make
 | :----------: | :--: |
 | Ubuntu 22.04 |  ✅   |
 | Ubuntu 20.04 |  ✅   |
-| Ubuntu 18.04 |  暫時不行   |
+| Ubuntu 18.04 |  ❓   |
 
 
 
@@ -151,7 +151,7 @@ NuOJ-Sandbox 使用 JSON 格式的 Data 來進行操作，如下：
 | 操作 |        code        |      solution      |      checker       |     execution      |      testcase      |      option        |
 | :--: | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: |
 | 評測 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | 
-| 執行 | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: | 
+| 執行 | code 或 solution 擇一 | code 或 solution 擇一 |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: | 
 | 編譯 | :white_check_mark: |                    |                    | :white_check_mark: |                    | :white_check_mark: | 
 
 
