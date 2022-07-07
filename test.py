@@ -2,6 +2,7 @@ import os
 import sys
 import requests
 import json
+import traceback
 
 # Check Service is OK.
 def service_test():
@@ -23,6 +24,7 @@ def service_heartbeat_test():
         response_data = json.loads(req.text)
         print("heartbeat test passed.")
     except Exception as e:
+        print(traceback.format_exc())
         print("Failed at heartbeat test")
         sys.exit(1)
 
@@ -48,6 +50,7 @@ def sandbox_test():
         print("sandbox test passed.")
         sys.exit(0)
     except Exception as e:
+        print(traceback.format_exc())
         print("Failed at sandbox test")
         sys.exit(1)
 
