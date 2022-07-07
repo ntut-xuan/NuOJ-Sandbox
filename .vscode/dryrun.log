@@ -1,7 +1,7 @@
 make --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/opt/nuoj-sandbox'
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get -y upgrade
 sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev
 sudo mkdir ~/isolate
 sudo git clone https://github.com/ioi/isolate.git ~/isolate

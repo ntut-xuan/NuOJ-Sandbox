@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Jul  7 03:13:05 2022
+# Make data base, printed on Thu Jul  7 11:34:05 2022
 
 # Variables
 
@@ -141,7 +141,7 @@ LC_PAPER = lzh_TW
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-8618d0b7-b48c-48de-9344-c90b37ab51be.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-57498b82-c410-433b-8191-632b5aa8aafa.sock
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -171,9 +171,9 @@ SSH_CONNECTION = 192.168.0.100 57042 192.168.0.105 22
 
 # Directories
 
-# . (device 2051, inode 23069314): 14 files, no impossibilities.
+# . (device 2051, inode 23069314): 19 files, no impossibilities.
 
-# 14 files, no impossibilities in 1 directories.
+# 19 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -184,7 +184,7 @@ SSH_CONNECTION = 192.168.0.100 57042 192.168.0.105 22
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-06 00:39:16.069669857
+#  Last modified 2022-07-07 04:19:43.009549024
 #  File has been updated.
 #  Successfully updated.
 
@@ -229,10 +229,10 @@ install:
 # Load=8/32=25%, Rehash=0, Collisions=1/11=9%
 #  recipe to execute (from 'Makefile', line 4):
 	sudo apt-get update
-	sudo apt-get upgrade
+	sudo apt-get -y upgrade
 	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev
-	sudo mkdir ~/isolate
-	sudo git clone https://github.com/ioi/isolate.git ~/isolate
+	-sudo mkdir ~/isolate
+	-sudo git clone https://github.com/ioi/isolate.git ~/isolate
 	sudo make -C ~/isolate install
 	sudo mkdir /opt/nuoj-sandbox
 	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ-Sandbox.git /opt/nuoj-sandbox
@@ -258,12 +258,12 @@ install:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 20 / storage = 200 B / avg = 10 B
-# current buf: size = 8162 B / used = 200 B / count = 20 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 25 / storage = 271 B / avg = 10 B
+# current buf: size = 8162 B / used = 271 B / count = 25 / avg = 10 B
 
-# strcache performance: lookups = 29 / hit rate = 31%
+# strcache performance: lookups = 34 / hit rate = 26%
 # hash-table stats:
-# Load=20/8192=0%, Rehash=0, Collisions=0/29=0%
-# Finished Make data base on Thu Jul  7 03:13:05 2022
+# Load=25/8192=0%, Rehash=0, Collisions=0/34=0%
+# Finished Make data base on Thu Jul  7 11:34:05 2022
 
  

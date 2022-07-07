@@ -103,7 +103,12 @@ def judge(language, testcase, box_id, option=None):
     except Exception as e:
         print(traceback.format_exc())
         return (str(traceback.format_exc()), False)
-        
+
+@app.route("/heartbeat", methods=["GET"])
+def heartbeat():
+    result = {"status": "OK"}
+    return Response(json.dumps(result), mimetype="application/json")
+
 @app.route("/result/<uuid>/", methods=["GET"])
 def result_return(uuid):
     result = {"status": "OK", "result": result_map[uuid]}
