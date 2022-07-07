@@ -50,3 +50,7 @@ def sandbox_test():
     except Exception as e:
         print("Failed at sandbox test")
         sys.exit(1)
+
+service_test()
+service_heartbeat_test()
+sandbox_test()
