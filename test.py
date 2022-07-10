@@ -34,11 +34,8 @@ def sandbox_test():
         link = "http://127.0.0.1:4439/judge"
         post_data = {"code": open("./example_code/code.cpp", "r").read(),
                     "solution": open("./example_code/solution.cpp", "r").read(),
-                    "checker": open("./example_code/checker.cpp", "r").read(), "testcase": [], "execution": "J", "option": {"threading": False}}
-
-        for i in range(4):
-            #print("read testdata %d" % (i+1))
-            post_data["testcase"].append(open("./example_testcase/%d.in" % (i+1), "r").read())
+                    "checker": open("./example_code/checker.cpp", "r").read(), "testcase": [], "execution": "J", "option": {"threading": False, "time": 4, "wall_time": 4}}
+        
         req = requests.post(link, data=json.dumps(post_data))
         response_data = json.loads(req.text)
 

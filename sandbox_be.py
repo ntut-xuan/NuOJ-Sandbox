@@ -44,45 +44,46 @@ def do_work(tracker_id):
     user_code = data["code"]
     test_case = json.loads(open("/opt/nuoj-sandbox/testcase.json", "r").read())
     execution_type = data["execution"]
+    result = {}
 
     sem.acquire()
     box_id = available_box.pop()
 
-    result_map[tracker_id] = {}
-    result_map[tracker_id]["flow"] = {}
-    result_map[tracker_id]["status"] = "Initing"
+    result[tracker_id] = {}
+    result["flow"] = {}
+    result["status"] = "Initing"
 
     _, status = init(user_code, Language.CPP.value, CodeType.SUBMIT.value, box_id)
     
-    result_map[tracker_id]["flow"]["init_code"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    result["flow"]["init_code"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if "solution" in data:
         solution_code = data["solution"]
         _, status = init(solution_code, Language.CPP.value, CodeType.SOLUTION.value, box_id)
-        result_map[tracker_id]["flow"]["init_solution"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        result["flow"]["init_solution"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if "checker" in data:
         checker_code = data["checker"]
         _, status = init(checker_code, Language.CPP.value, CodeType.CHECKER.value, box_id)
-        result_map[tracker_id]["flow"]["init_checker"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        result["flow"]["init_checker"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     isolate.touch_text_file_by_file_name(open("/opt/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id)
-    result_map[tracker_id]["flow"]["touch_testlib"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    result["flow"]["touch_testlib"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    result_map[tracker_id]["status"] = "Running"
-    result_map[tracker_id]["flow"]["running"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    result["status"] = "Running"
+    result["flow"]["running"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if execution_type == "C":
-        result_map[tracker_id]["result"] = compile(Language.CPP.value, CodeType.SUBMIT.value, box_id)
+        result["result"] = compile(Language.CPP.value, CodeType.SUBMIT.value, box_id)
     elif execution_type == "E":
-        result_map[tracker_id]["result"] = execute(Language.CPP.value, CodeType.SUBMIT.value, time, wall_time, test_case, box_id)
+        result["result"] = execute(Language.CPP.value, CodeType.SUBMIT.value, time, wall_time, test_case, box_id)
     elif execution_type == "J":
-        result_map[tracker_id]["result"] = judge(Language.CPP.value, test_case, time, wall_time, box_id)
+        result["result"] = judge(Language.CPP.value, test_case, time, wall_time, box_id)
 
-    result_map[tracker_id]["flow"]["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    result_map[tracker_id]["status"] = "Finished"
+    result["flow"]["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    result["status"] = "Finished"
 
-    open("/opt/nuoj-sandbox/result/%s.result" % tracker_id, "w").write(json.dumps(result_map[tracker_id]))
-    del result_map[tracker_id]
+    open("/opt/nuoj-sandbox/result/%s.result" % tracker_id, "w").write(json.dumps(result))
+    del result
 
     available_box.add(box_id)
     sem.release()
@@ -248,8 +249,8 @@ def judge_route():
         response["status"] = "Failed"
 
     if not option["threading"]:
-        response["result"] = result_map[tracker_id]
-    
+        response["result"] = json.loads(open("/opt/nuoj-sandbox/result/%s.result" % tracker_id, "r").read())
+
     return Response(json.dumps(response), mimetype="application/json")
 
 
