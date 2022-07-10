@@ -21,5 +21,8 @@ jobs:
     - name: NuOJ Sandbox Status
       run: sudo systemctl status nuoj-sandbox
 
+    - name: fetch 4439 service
+      run: sudo lsof -i:4439
+
     - name: Check NuOJ status
       run: sudo python3 test.py
