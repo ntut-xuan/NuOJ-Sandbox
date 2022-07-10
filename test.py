@@ -3,6 +3,7 @@ import sys
 import requests
 import json
 import traceback
+from sandbox_be import app
 
 # Check Service is OK.
 def service_test():
@@ -15,13 +16,13 @@ def service_test():
 
     print("service test passed.")
 
+test_client = app.test_client()
+
 # Check Sandbox heartbeat
 def service_heartbeat_test():
     try:
-        link = "http://127.0.0.1:4439/heartbeat"
-        req = requests.get(link)
-        response_data = json.loads(req.text)
-        if req.status_code == 200: 
+        response = test_client.get("/heartbeat")
+        if response.status_code == 200: 
             print("heartbeat test passed.")
         else:
             print("Failed at heartbeat test")
@@ -34,15 +35,13 @@ def service_heartbeat_test():
 # Check Sandbox working correctly.
 def sandbox_test():
     try:
-        link = "http://127.0.0.1:4439/judge"
         post_data = {"code": open("./example_code/code.cpp", "r").read(),
                     "solution": open("./example_code/solution.cpp", "r").read(),
                     "checker": open("./example_code/checker.cpp", "r").read(), "testcase": [], 
                     "execution": "J", "option": {"threading": False, "time": 4, "wall_time": 4}}
         
-        req = requests.post(link, data=json.dumps(post_data))
-        print(req.text)
-        response_data = json.loads(req.text)
+        req = test_client.post("/judge" ,data=json.dumps(post_data))
+        response_data = json.loads(req.data)
 
         for data in response_data["result"]["result"]["report"]:
             if data["verdict"] != "AC":
