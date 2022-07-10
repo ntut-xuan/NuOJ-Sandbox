@@ -126,16 +126,18 @@ def compile(type, language, box_id=0) -> str:
     code_output = "%s%s" % (type, ".o")
     meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
-    subprocess.call("isolate --time=4 -p --full-env --meta='%s' --run -- /usr/bin/g++ %s -o %s" % (meta_path, code_path, code_output), shell=True)
+    subprocess.call("isolate --time=10 -p --box-id=%d --full-env --meta='%s' --run -- /usr/bin/g++ %s -o %s" % (box_id, meta_path, code_path, code_output), shell=True)
     return read_meta(box_id)
 
-def execute(type, test_case_count, box_id=0) -> str:
+def execute(type, test_case_count, time, wall_time, box_id=0) -> str:
     '''
     Execute the program on the specific ID of the sandbox.
 
         Parameters:
             type: The type of code, reference CodeType class.
             test_case_count: The count of testcase.
+            time: The time limit of program execute.
+            wall_time: The wall time limit of program execute.
             box_id: The ID of the sandbox you want to compile the program.
 
         Return:
@@ -148,7 +150,7 @@ def execute(type, test_case_count, box_id=0) -> str:
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
     for i in range(test_case_count):
         output_file = "%d.out" % (i+1) if type == CodeType.SOLUTION.value else "%d.ans" % (i+1)
-        command = "isolate --time=4 --wall-time=4 -p --full-env --stdin='%d.in' --stdout='%s' --meta='%s' --run -- %s" % (i+1, output_file, meta_path, code_output)
+        command = "isolate --box-id=%d --time=%d --wall-time=%d -p --full-env --stdin='%d.in' --stdout='%s' --meta='%s' --run -- %s" % (box_id, time, wall_time, i+1, output_file, meta_path, code_output)
         touch_text_file_by_file_name("", output_file, box_id)
         print("Execute testcase %d" % (i+1))
         subprocess.call(command, shell=True)
@@ -157,7 +159,7 @@ def execute(type, test_case_count, box_id=0) -> str:
         output.append((meta, stdout_text))
     return output
 
-def checker(test_case_count, box_id):
+def checker(test_case_count, time, wall_time, box_id):
     '''
     Execute the checker program on the specific ID of the sandbox.
 
@@ -174,7 +176,7 @@ def checker(test_case_count, box_id):
     output = []
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
     for i in range(test_case_count):
-        command = "isolate --time=4 --wall-time=4 -p --full-env --meta='%s' --run -- %s %d.in %d.out %d.ans" % (meta_path, code_output, i+1, i+1, i+1)
+        command = "isolate --box-id=%d --time=%d --wall-time=%d -p --full-env --meta='%s' --run -- %s %d.in %d.out %d.ans" % (box_id, time, wall_time, meta_path, code_output, i+1, i+1, i+1)
         subprocess.call(command, shell=True)
         meta = read_meta(box_id)
         output.append(meta)
