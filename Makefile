@@ -8,9 +8,9 @@ install:
 	-sudo git clone https://github.com/ioi/isolate.git ~/isolate
 	sudo make -C ~/isolate install
 	sudo mkdir /opt/nuoj-sandbox
+	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ-Sandbox.git /opt/nuoj-sandbox
 	sudo mkdir /opt/nuoj-sandbox/result
 	sudo mkdir /opt/nuoj-sandbox/submission
-	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ-Sandbox.git /opt/nuoj-sandbox
 	sudo chmod -R 647 /opt/nuoj-sandbox/*
 	sudo cp /opt/nuoj-sandbox/nuoj-sandbox.service /etc/systemd/system/
 	sudo chmod 647 /etc/systemd/system/nuoj-sandbox.service
