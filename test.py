@@ -41,6 +41,7 @@ def sandbox_test():
                     "execution": "J", "option": {"threading": False, "time": 4, "wall_time": 4}}
         
         req = requests.post(link, data=json.dumps(post_data))
+        print(req.text)
         response_data = json.loads(req.text)
 
         for data in response_data["result"]["result"]["report"]:
