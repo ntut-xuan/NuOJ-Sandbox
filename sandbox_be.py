@@ -83,12 +83,12 @@ def do_work(tracker_id):
     result["status"] = "Finished"
 
     open("/opt/nuoj-sandbox/result/%s.result" % tracker_id, "w").write(json.dumps(result))
-    del result
 
     available_box.add(box_id)
     sem.release()
 
     finish(box_id)
+    return result
 
 
 def init(code, language, type, box_id, option=None):
@@ -242,14 +242,14 @@ def judge_route():
     if option["threading"]:
         submission_list.append(tracker_id)
     else:
-        do_work(tracker_id)
+        result = do_work(tracker_id)
 
     response = {"status": "OK", "type": execution_type, "tracker_id": tracker_id}
     if(status == False):
         response["status"] = "Failed"
 
     if not option["threading"]:
-        response["result"] = json.loads(open("/opt/nuoj-sandbox/result/%s.result" % tracker_id, "r").read())
+        response["result"] = result
 
     return Response(json.dumps(response), mimetype="application/json")
 
