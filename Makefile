@@ -18,3 +18,4 @@ install:
 	sudo systemctl daemon-reload
 	sudo systemctl enable nuoj-sandbox
 	sudo systemctl start nuoj-sandbox
+	sudo python3 env_setting.py

@@ -17,7 +17,7 @@ def init_sandbox(box_id=0):
             box_id: The specific ID of the sandbox
     
     '''
-    subprocess.call("isolate --box-id=%d --init" % (box_id), shell=True)
+    subprocess.call("isolate --cg --box-id=%d --init" % (box_id), shell=True)
 
 
 def touch_text_file(text, type: CodeType, language: Language, box_id=0) -> tuple:
@@ -106,7 +106,7 @@ def cleanup_sandbox(box_id=0):
             box_id: The ID of the sandbox you want to cleanup.
     
     '''
-    subprocess.call("isolate --box-id=%d --cleanup" % (box_id), shell=True)
+    subprocess.call("isolate --cg --box-id=%d --cleanup" % (box_id), shell=True)
 
 
 def compile(type, language, box_id=0) -> str:
@@ -126,7 +126,7 @@ def compile(type, language, box_id=0) -> str:
     code_output = "%s%s" % (type, ".o")
     meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
-    subprocess.call("isolate --time=10 -p --box-id=%d --full-env --meta='%s' --run -- /usr/bin/g++ %s -o %s" % (box_id, meta_path, code_path, code_output), shell=True)
+    subprocess.call("isolate --cg --time=10 -p --box-id=%d --cg-mem 256000 --full-env --meta='%s' --run -- /usr/bin/g++ %s -o %s" % (box_id, meta_path, code_path, code_output), shell=True)
     return read_meta(box_id)
 
 def execute(type, test_case_count, time, wall_time, box_id=0) -> str:
@@ -150,7 +150,7 @@ def execute(type, test_case_count, time, wall_time, box_id=0) -> str:
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
     for i in range(test_case_count):
         output_file = "%d.out" % (i+1) if type == CodeType.SOLUTION.value else "%d.ans" % (i+1)
-        command = "isolate --box-id=%d --time=%d --wall-time=%d -p --full-env --stdin='%d.in' --stdout='%s' --meta='%s' --run -- %s" % (box_id, time, wall_time, i+1, output_file, meta_path, code_output)
+        command = "isolate --cg --box-id=%d --time=%d --cg-mem 256000 --wall-time=%d -p --full-env --stdin='%d.in' --stdout='%s' --meta='%s' --run -- %s" % (box_id, time, wall_time, i+1, output_file, meta_path, code_output)
         touch_text_file_by_file_name("", output_file, box_id)
         print("Execute testcase %d" % (i+1))
         subprocess.call(command, shell=True)
@@ -176,7 +176,7 @@ def checker(test_case_count, time, wall_time, box_id):
     output = []
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
     for i in range(test_case_count):
-        command = "isolate --box-id=%d --time=%d --wall-time=%d -p --full-env --meta='%s' --run -- %s %d.in %d.out %d.ans" % (box_id, time, wall_time, meta_path, code_output, i+1, i+1, i+1)
+        command = "isolate --cg --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --run -- %s %d.in %d.out %d.ans" % (box_id, time, wall_time, meta_path, code_output, i+1, i+1, i+1)
         subprocess.call(command, shell=True)
         meta = read_meta(box_id)
         output.append(meta)
