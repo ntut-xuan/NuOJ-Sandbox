@@ -16,7 +16,9 @@ def set_grub():
                 temp1.append("cgroup_enable=memory")
             if not "swapaccount=1" in text:
                 temp1.append("swapaccount=1")
-
+            if not "systemd.unified_cgroup_hierarchy=false" in text:
+                temp1.append("systemd.unified_cgroup_hierarchy=false")
+            
             temp[index] = spltext[0] + spltext[1] + " " + " ".join(temp1) + spltext[-1]       
     f.close()
 

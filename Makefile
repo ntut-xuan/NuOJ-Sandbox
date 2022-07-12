@@ -4,7 +4,7 @@ install:
 	sudo apt-get update
 	sudo apt-get -y upgrade
 	sudo apt-get install -y python3 python3-pip git build-essential asciidoc-base libcap-dev
-	sudo apt-get install -y sysfsutils
+	sudo apt-get install -y sysfsutils cgroup-tools
 	-sudo mkdir ~/isolate
 	-sudo git clone https://github.com/ioi/isolate.git ~/isolate
 	sudo make -C ~/isolate install
