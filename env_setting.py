@@ -37,9 +37,9 @@ def set_kernel():
 def run_save():
     os.system("sysctl -p")
     os.system("update-grub")
-    reboot = input("A computer restart is needed to complete your installation. Do you want to restart now?(Y|n)")
-    if reboot == "Y" or reboot == "":
-        os.system("reboot")
+    # reboot = input("A computer restart is needed to complete your installation. Do you want to restart now?(Y|n)")
+    # if reboot == "Y" or reboot == "":
+    os.system("reboot")
 
 
 if __name__ == "__main__":
