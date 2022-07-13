@@ -1,6 +1,6 @@
 import os
 import subprocess
-
+import sys
 
 def set_grub():
     f = open("/etc/default/grub", mode="r")
