@@ -16,9 +16,7 @@ def set_grub():
                 temp1.append("cgroup_enable=memory")
             if not "swapaccount=1" in text:
                 temp1.append("swapaccount=1")
-            if not "systemd.unified_cgroup_hierarchy=false" in text:
-                temp1.append("systemd.unified_cgroup_hierarchy=false")
-            
+
             temp[index] = spltext[0] + spltext[1] + " " + " ".join(temp1) + spltext[-1]       
     f.close()
 
@@ -39,9 +37,9 @@ def set_kernel():
 def run_save():
     os.system("sysctl -p")
     os.system("update-grub")
-    # reboot = input("A computer restart is needed to complete your installation. Do you want to restart now?(Y|n)")
-    # if reboot == "Y" or reboot == "":
-    os.system("reboot")
+    reboot = input("A computer restart is needed to complete your installation. Do you want to restart now?(Y|n)")
+    if reboot == "Y" or reboot == "":
+        os.system("reboot")
 
 
 if __name__ == "__main__":
