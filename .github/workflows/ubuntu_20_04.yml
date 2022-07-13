@@ -16,8 +16,8 @@ jobs:
       uses: actions/checkout@v3
     
     - name: Install
-      run: make install reboot=N
-      
+      run: make reboot=N
+
     - name: NuOJ Sandbox Status
       run: sudo systemctl status nuoj-sandbox
 
