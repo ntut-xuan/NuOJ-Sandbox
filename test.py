@@ -35,9 +35,9 @@ def service_heartbeat_test():
 # Check Sandbox working correctly.
 def sandbox_test():
     try:
-        post_data = {"code": open("./example_code/code.cpp", "r").read(),
-                    "solution": open("./example_code/solution.cpp", "r").read(),
-                    "checker": open("./example_code/checker.cpp", "r").read(), "testcase": [], 
+        post_data = {"code": open("/opt/nuoj-sandbox/example_code/code.cpp", "r").read(),
+                    "solution": open("/opt/nuoj-sandbox/example_code/solution.cpp", "r").read(),
+                    "checker": open("/opt/nuoj-sandbox/example_code/checker.cpp", "r").read(), "testcase": [], 
                     "execution": "J", "option": {"threading": False, "time": 4, "wall_time": 4}}
         
         req = test_client.post("/judge" ,data=json.dumps(post_data))
