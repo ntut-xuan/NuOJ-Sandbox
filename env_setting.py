@@ -36,15 +36,22 @@ def set_kernel():
     if not subprocess.check_output(['cat', '/sys/kernel/mm/transparent_hugepage/khugepaged/defrag']).decode("utf-8") == "0\n": 
         os.system("echo 'kernel/mm/transparent_hugepage/khugepaged/defrag = 0' >> /etc/sysfs.conf")
 
-def run_save():
+def run_save(reboot=True):
     os.system("sysctl -p")
     os.system("update-grub")
     # reboot = input("A computer restart is needed to complete your installation. Do you want to restart now?(Y|n)")
     # if reboot == "Y" or reboot == "":
-    os.system("reboot")
+    if reboot:
+        os.system("reboot")
 
 
 if __name__ == "__main__":
+    reboot_flag = None
+    if len(sys.argv) > 1:
+        if(sys.argv[1] == "y" or sys.argv[1] == 'Y'):
+            reboot_flag = True
+        else:
+            reboot_flag = False
     set_grub()
     set_kernel()
-    run_save()
+    run_save(reboot=reboot_flag)
