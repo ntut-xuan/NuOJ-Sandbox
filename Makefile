@@ -1,4 +1,4 @@
-all: install
+all: install env_setting
 
 install:
 	sudo apt-get update
@@ -19,4 +19,7 @@ install:
 	sudo systemctl daemon-reload
 	sudo systemctl enable nuoj-sandbox
 	sudo systemctl start nuoj-sandbox
-	sudo python3 /opt/nuoj-sandbox/env_setting.py
+	
+
+env_setting:
+	sudo python3 /opt/nuoj-sandbox/env_setting.py ${reboot}
