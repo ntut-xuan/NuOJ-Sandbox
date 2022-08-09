@@ -3,7 +3,7 @@ Description=NuOJ-Sandbox
 
 [Service]
 Type=simple
-ExecStart=/opt/nuoj-sandbox/sandbox_be.py
+ExecStart=/etc/nuoj-sandbox/sandbox_be.py
 Restart=always
 Environment=PYTHONUNBUFFERED=1
 
