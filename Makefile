@@ -8,12 +8,12 @@ install:
 	sudo mkdir ~/isolate
 		sudo git clone https://github.com/ioi/isolate.git ~/isolate
 	sudo make -C ~/isolate install
-	sudo mkdir /opt/nuoj-sandbox
-	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ-Sandbox.git /opt/nuoj-sandbox
-	sudo mkdir /opt/nuoj-sandbox/result
-	sudo mkdir /opt/nuoj-sandbox/submission
-	sudo chmod -R 647 /opt/nuoj-sandbox/*
-	sudo cp /opt/nuoj-sandbox/nuoj-sandbox.service /etc/systemd/system/
+	sudo mkdir /etc/nuoj-sandbox
+	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ-Sandbox.git /etc/nuoj-sandbox
+	sudo mkdir /etc/nuoj-sandbox/result
+	sudo mkdir /etc/nuoj-sandbox/submission
+	sudo chmod -R 647 /etc/nuoj-sandbox/*
+	sudo cp /etc/nuoj-sandbox/nuoj-sandbox.service /etc/systemd/system/
 	sudo chmod 647 /etc/systemd/system/nuoj-sandbox.service
 	sudo pip3 install flask
 	sudo systemctl daemon-reload
@@ -22,4 +22,4 @@ install:
 	
 
 env_setting:
-	sudo python3 /opt/nuoj-sandbox/env_setting.py ${reboot}
+	sudo python3 /etc/nuoj-sandbox/env_setting.py ${reboot}
