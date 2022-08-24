@@ -39,12 +39,12 @@ def do_work(tracker_id):
 	這是主要處理測資評測的函數，首先會從檔案堆裡找出提交的 json file 與測資的 json file。
 	接著會進行初始化、編譯、執行、評測、完成這五個動作，主要設計成盡量不要使用記憶體的空間，避免大量提交導致記憶體耗盡。
 	'''
-	data = json.loads(open("/etc/nuoj-sandbox/submission/%s.json" % tracker_id, "r").read())
+	data = json.loads(open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "r").read())
 	option = data["option"]
 	time = option["time"]
 	wall_time = option["wall_time"]
 	user_code = data["code"]
-	test_case = json.loads(open("/etc/nuoj-sandbox/testcase.json", "r").read())
+	test_case = json.loads(open("/etc/nuoj-sandbox/storage/testcase/testcase.json", "r").read())
 	execution_type = data["execution"]
 	result = {}
 
@@ -84,7 +84,7 @@ def do_work(tracker_id):
 	result["flow"]["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	result["status"] = "Finished"
 
-	open("/etc/nuoj-sandbox/result/%s.result" % tracker_id, "w").write(json.dumps(result))
+	open("/etc/nuoj-sandbox/storage/result/%s.result" % tracker_id, "w").write(json.dumps(result))
 
 	available_box.add(box_id)
 	sem.release()
@@ -224,7 +224,7 @@ def result_return(uuid):
 	'''
 	這是一個回傳的 route function，主要拿來獲取某個評測 uuid 的結果。
 	'''
-	result = json.loads(open("/etc/nuoj-sandbox/result/%s.result" % (uuid)).read())
+	result = json.loads(open("/etc/nuoj-sandbox/storage/result/%s.result" % (uuid)).read())
 	return Response(json.dumps(result), mimetype="application/json")
 
 @app.route("/judge", methods=["POST"])
@@ -238,7 +238,7 @@ def judge_route():
 	status = None
 	tracker_id = str(uuid.uuid4())
 
-	open("/etc/nuoj-sandbox/submission/%s.json" % tracker_id, "w").write(json.dumps(data))
+	open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "w").write(json.dumps(data))
 	del data
 
 	if option["threading"]:

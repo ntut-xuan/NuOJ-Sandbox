@@ -12,6 +12,8 @@ install:
 	sudo git clone --recursive https://github.com/ntut-xuan/NuOJ-Sandbox.git /etc/nuoj-sandbox
 	sudo mkdir /etc/nuoj-sandbox/storage
 	sudo mkdir /etc/nuoj-sandbox/storage/testcase
+	sudo mkdir /etc/nuoj-sandbox/storage/submission
+	sudo mkdir /etc/nuoj-sandbox/storage/result
 	sudo chmod -R 647 /etc/nuoj-sandbox/*
 	sudo cp /etc/nuoj-sandbox/nuoj-sandbox.service /etc/systemd/system/
 	sudo chmod 647 /etc/systemd/system/nuoj-sandbox.service
