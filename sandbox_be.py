@@ -44,7 +44,7 @@ def do_work(tracker_id):
 	time = option["time"]
 	wall_time = option["wall_time"]
 	user_code = data["code"]
-	test_case = json.loads(open("/etc/nuoj-sandbox/storage/testcase/testcase.json", "r").read())
+	test_case = json.loads(open("/etc/nuoj-sandbox/testcase.json", "r").read())
 	execution_type = data["execution"]
 	result = {}
 
