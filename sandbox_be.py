@@ -9,6 +9,7 @@ import traceback
 import uuid
 import time
 import storage_util
+import requests
 from datetime import datetime
 
 setting = json.loads(open("/etc/nuoj-sandbox/setting.json", "r").read())
@@ -87,6 +88,18 @@ def do_work(tracker_id):
 	open("/etc/nuoj-sandbox/storage/result/%s.result" % tracker_id, "w").write(json.dumps(result))
 
 	available_box.add(box_id)
+
+	if "webhook_url" in option:
+		resp = requests.post(option["webhook_url"], data=json.dumps({"status": "OK", "data": result}), headers={"content-type": "application/json"})
+		if(resp.status_code != 200):
+			print("webhook_url " + option["webhook_url"] + " has error that occur result " + tracker_id + " has error.")
+		else:
+			json_data = json.loads(resp.text)
+			if(json_data["status"] != "OK"):
+				print("webhook_url " + option["webhook_url"] + " has error that occur result " + tracker_id + " send failed.")
+			else:
+				print("webhook_url " + option["webhook_url"] + " send successfully")
+
 	sem.release()
 
 	finish(box_id)
