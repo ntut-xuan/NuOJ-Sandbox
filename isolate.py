@@ -8,9 +8,27 @@ import subprocess
 import os
 from sandbox_enum import CodeType, Language
 
+def compile_command_generator(type, language: Language):
+    java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
+    type = java_type if language == Language.JAVA.value else type
+    compile_command_map = {
+        Language.CPP.value: "/usr/bin/g++ %s.cpp -o %s.o" % (type, type),
+        Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/javac %s.java" % type,
+        Language.PYTHON.value: "/usr/bin/echo 'Python compile skiped.'",
+    }
+    return compile_command_map[language]
+
+def execute_command(type, langauge: Language):
+    java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
+    execute_command_map = {
+        Language.CPP.value: "%s.o" % type,
+        Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/java %s" % java_type,
+        Language.PYTHON.value: "/usr/bin/python3 %s.py" % type,
+    }
+    return execute_command_map[langauge]
 
 def init_sandbox(box_id=0):
-    '''
+    '''j
     Initialize the specific ID of the sandbox.
 
         Args:
@@ -36,6 +54,8 @@ def touch_text_file(text, type: CodeType, language: Language, box_id=0) -> tuple
             The second element is the status, True for success, False otherwise.
     
     '''
+    java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
+    type = java_type if language == Language.JAVA.value else type
     path = "/var/local/lib/isolate/%d/box/%s%s" % (box_id, type, language)
     print("create file at", path)
     with open(path, "w") as code_file:
@@ -122,14 +142,14 @@ def compile(type, language, box_id=0) -> str:
             A string of results on the meta file after finished compiled.
     
     '''
-    code_path = "%s%s" % (type, language)
-    code_output = "%s%s" % (type, ".o")
     meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
+    compile_command = compile_command_generator(type, language) 
+    command = "isolate --cg --time=10 -p --box-id=%d --cg-mem 256000 --full-env --meta='%s' --run -- " + compile_command
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
-    subprocess.call("isolate --cg --time=10 -p --box-id=%d --cg-mem 256000 --full-env --meta='%s' --run -- /usr/bin/g++ %s -o %s" % (box_id, meta_path, code_path, code_output), shell=True)
+    subprocess.call(command % (box_id, meta_path), shell=True)
     return read_meta(box_id)
 
-def execute(type, test_case_count, time, wall_time, box_id=0) -> str:
+def execute(type, test_case_count, time, wall_time, language, box_id=0) -> str:
     '''
     Execute the program on the specific ID of the sandbox.
 
@@ -138,22 +158,23 @@ def execute(type, test_case_count, time, wall_time, box_id=0) -> str:
             test_case_count: The count of testcase.
             time: The time limit of program execute.
             wall_time: The wall time limit of program execute.
+            language: The language of program.
             box_id: The ID of the sandbox you want to compile the program.
 
         Return:
             A string of results on the meta file after finished execute.
     
     '''
-    code_output = "%s%s" % (type, ".o")
+    exec_command = execute_command(type, language)
     meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
     output = []
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
     for i in range(test_case_count):
         output_file = "%d.out" % (i+1) if type == CodeType.SOLUTION.value else "%d.ans" % (i+1)
-        command = "isolate --cg --box-id=%d --time=%d --cg-mem 256000 --wall-time=%d -p --full-env --stdin='%d.in' --stdout='%s' --meta='%s' --run -- %s" % (box_id, time, wall_time, i+1, output_file, meta_path, code_output)
+        command = "isolate --cg --box-id=%d --time=%d --cg-mem 256000 --wall-time=%d -p --full-env --stdin='%d.in' --stdout='%s' --meta='%s' --run -- " + exec_command 
         touch_text_file_by_file_name("", output_file, box_id)
         print("Execute testcase %d" % (i+1))
-        subprocess.call(command, shell=True)
+        subprocess.call(command % (box_id, time, wall_time, i+1, output_file, meta_path), shell=True)
         meta = read_meta(box_id)
         stdout_text = read_output(i+1, type, box_id)
         output.append((meta, stdout_text))

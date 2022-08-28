@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask, request, Response
-from sandbox_enum import CodeType, Language
+from sandbox_enum import CodeType, Language, str2Language
 from tunnel_code import TunnelCode
 import isolate
 import json
@@ -47,6 +47,10 @@ def do_work(tracker_id):
 	user_code = data["code"]
 	test_case = json.loads(open("/etc/nuoj-sandbox/testcase.json", "r").read())
 	execution_type = data["execution"]
+	code_language = str2Language(data["code_language"])
+	solution_language = str2Language(data["solution_language"])
+	checker_language = str2Language(data["checker_language"])
+	language_map = {"submit_code": code_language, "solution": solution_language, "checker": checker_language}
 	result = {}
 
 	sem.acquire()
@@ -55,17 +59,17 @@ def do_work(tracker_id):
 	result["flow"] = {}
 	result["status"] = "Initing"
 
-	_, status = init(user_code, Language.CPP.value, CodeType.SUBMIT.value, box_id)
+	_, status = init(user_code, code_language.value, CodeType.SUBMIT.value, box_id)
 	
 	result["flow"]["init_code"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 	if "solution" in data:
 		solution_code = data["solution"]
-		_, status = init(solution_code, Language.CPP.value, CodeType.SOLUTION.value, box_id)
+		_, status = init(solution_code, solution_language.value, CodeType.SOLUTION.value, box_id)
 		result["flow"]["init_solution"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	if "checker" in data:
 		checker_code = data["checker"]
-		_, status = init(checker_code, Language.CPP.value, CodeType.CHECKER.value, box_id)
+		_, status = init(checker_code, checker_language.value, CodeType.CHECKER.value, box_id)
 		result["flow"]["init_checker"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 	isolate.touch_text_file_by_file_name(open("/etc/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id)
@@ -75,11 +79,11 @@ def do_work(tracker_id):
 	result["flow"]["running"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 	if execution_type == "C":
-		result["result"] = compile(Language.CPP.value, CodeType.SUBMIT.value, box_id)
+		result["result"] = compile(language_map, CodeType.SUBMIT.value, box_id)
 	elif execution_type == "E":
-		result["result"] = execute(Language.CPP.value, CodeType.SUBMIT.value, time, wall_time, test_case, box_id)
+		result["result"] = execute(language_map, CodeType.SUBMIT.value, time, wall_time, test_case, box_id)
 	elif execution_type == "J":
-		result["result"] = judge(Language.CPP.value, test_case, time, wall_time, box_id)
+		result["result"] = judge(language_map, test_case, time, wall_time, box_id)
 
 	result["flow"]["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	result["status"] = "Finished"
@@ -132,12 +136,12 @@ def meta_data_to_dict(meta):
 	return meta_data
 
 
-def compile(language, type, box_id, option=None):
+def compile(language_map, type, box_id, option=None):
 	'''
 	這是一個編譯的函數，主要會將程式碼進行編譯，並回傳 meta dict。
 	'''
 	try:
-		meta = isolate.compile(type, language, box_id)
+		meta = isolate.compile(type, language_map[type].value, box_id)
 		meta_data = meta_data_to_dict(meta)
 
 		if "status" in meta_data:
@@ -151,20 +155,20 @@ def compile(language, type, box_id, option=None):
 		return (str(traceback.format_exc()), False)
 
 
-def execute(language, type, time, wall_time, testcase, box_id, option=None) -> dict:
+def execute(language_map, type, time, wall_time, testcase, box_id, option=None) -> dict:
 	'''
 	這是一個執行的函數，主要會將測資放入沙盒，使用程式碼進行執行，並回傳結果。
 	'''
 	try:
 		output_data = []
 		result_data = {}
-		meta_data = compile(language, type, box_id)
+		meta_data = compile(language_map, type, box_id)
 		for i in range(len(testcase)):
 			isolate.touch_text_file_by_file_name(testcase[i], "%d.in" % (i+1), box_id)
 		if(meta_data["compile-result"] == "Failed"):
 			result_data["compile"] = meta_data
 			return result_data
-		output = isolate.execute(type, len(testcase), time, wall_time, box_id)
+		output = isolate.execute(type, len(testcase), time, wall_time, language_map[type].value, box_id)
 		for data in output:
 			data_dict = {}
 			data_dict["meta"] = meta_data_to_dict(data[0])
@@ -178,22 +182,22 @@ def execute(language, type, time, wall_time, testcase, box_id, option=None) -> d
 		return (str(traceback.format_exc()), False)
 
 
-def judge(language, testcase, time, wall_time, box_id, option=None):
+def judge(language_map, testcase, time, wall_time, box_id, option=None):
 	'''
 	這是一個評測的函數，主要會編譯、執行並使用 checker 進行評測，回傳結果。
 	'''
 	try:
 		result = {}
 		# 編譯 checker
-		result["checker-compile"]  = compile(language, CodeType.CHECKER.value, box_id)
+		result["checker-compile"]  = compile(language_map, CodeType.CHECKER.value, box_id)
 		if(result["checker-compile"]["compile-result"] == "Failed"):
 			return result
 		# 運行 solution
-		result["solution_execute"] = execute(language, CodeType.SOLUTION.value, time, wall_time, testcase, box_id)
+		result["solution_execute"] = execute(language_map, CodeType.SOLUTION.value, time, wall_time, testcase, box_id)
 		if(result["solution_execute"]["compile"]["compile-result"] == "Failed"):
 			return result
 		# 運行 submit
-		result["submit_execute"]   = execute(language, CodeType.SUBMIT.value, time, wall_time, testcase, box_id)
+		result["submit_execute"]   = execute(language_map, CodeType.SUBMIT.value, time, wall_time, testcase, box_id)
 		if(result["submit_execute"]["compile"]["compile-result"] == "Failed"):
 			return result
 		# 運行 judge
