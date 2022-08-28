@@ -56,6 +56,7 @@ def sandbox_test_1():
     except Exception as e:
         print(traceback.format_exc())
         print("Failed at sandbox test #1")
+        sys.exit(1)
 
 # Check Sandbox working correctly.
 def sandbox_test_2():
@@ -84,6 +85,7 @@ def sandbox_test_2():
     except Exception as e:
         print(traceback.format_exc())
         print("Failed at sandbox test #2 ")
+        sys.exit(1)
 
 def sandbox_test_3():
     try:
@@ -111,10 +113,10 @@ def sandbox_test_3():
     except Exception as e:
         print(traceback.format_exc())
         print("Failed at sandbox test #3")
+        sys.exit(1)
 
 service_test()
 service_heartbeat_test()
 sandbox_test_1()
 sandbox_test_2()
-sandbox_test_3()
 sys.exit(0)

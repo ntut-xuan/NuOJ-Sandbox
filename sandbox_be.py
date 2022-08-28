@@ -48,9 +48,8 @@ def do_work(tracker_id):
 	test_case = json.loads(open("/etc/nuoj-sandbox/testcase.json", "r").read())
 	execution_type = data["execution"]
 	code_language = str2Language(data["code_language"])
-	solution_language = str2Language(data["solution_language"])
-	checker_language = str2Language(data["checker_language"])
-	language_map = {"submit_code": code_language, "solution": solution_language, "checker": checker_language}
+	solution_language = None
+	checker_language = None
 	result = {}
 
 	sem.acquire()
@@ -65,10 +64,12 @@ def do_work(tracker_id):
 
 	if "solution" in data:
 		solution_code = data["solution"]
+		solution_language = str2Language(data["solution_language"])
 		_, status = init(solution_code, solution_language.value, CodeType.SOLUTION.value, box_id)
 		result["flow"]["init_solution"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	if "checker" in data:
 		checker_code = data["checker"]
+		checker_language = str2Language(data["checker_language"])
 		_, status = init(checker_code, checker_language.value, CodeType.CHECKER.value, box_id)
 		result["flow"]["init_checker"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -77,6 +78,8 @@ def do_work(tracker_id):
 
 	result["status"] = "Running"
 	result["flow"]["running"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+	language_map = {"submit_code": code_language, "solution": solution_language, "checker": checker_language}
 
 	if execution_type == "C":
 		result["result"] = compile(language_map, CodeType.SUBMIT.value, box_id)
