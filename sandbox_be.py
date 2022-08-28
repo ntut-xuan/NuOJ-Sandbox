@@ -52,7 +52,6 @@ def do_work(tracker_id):
 	sem.acquire()
 	box_id = available_box.pop()
 
-	result[tracker_id] = {}
 	result["flow"] = {}
 	result["status"] = "Initing"
 
@@ -87,8 +86,6 @@ def do_work(tracker_id):
 
 	open("/etc/nuoj-sandbox/storage/result/%s.result" % tracker_id, "w").write(json.dumps(result))
 
-	available_box.add(box_id)
-
 	if "webhook_url" in option:
 		resp = requests.post(option["webhook_url"], data=json.dumps({"status": "OK", "data": result}), headers={"content-type": "application/json"})
 		if(resp.status_code != 200):
@@ -100,8 +97,8 @@ def do_work(tracker_id):
 			else:
 				print("webhook_url " + option["webhook_url"] + " send successfully")
 
+	available_box.add(box_id)
 	sem.release()
-
 	finish(box_id)
 	return result
 
@@ -208,11 +205,20 @@ def judge(language, testcase, time, wall_time, box_id, option=None):
 
 		report = []
 		for i in range(len(judge_meta_data)):
-			report_dict = {"verdict": "", "time": result["submit_execute"]["execute"][i]["meta"]["time"]}
+			report_dict = {"verdict": "", "time": result["submit_execute"]["execute"][i]["meta"]["time"], "memory": result["submit_execute"]["execute"][i]["meta"]["cg-mem"]}
 			report_dict["verdict"] =  "AC" if judge_meta_data[i]["exitcode"] == "0" else "WA"
 			report.append(report_dict)
 
 		result["report"] = report
+
+		verdict = "AC"
+		for report_data in report:
+			if report_data["verdict"] != "AC":
+				verdict = report_data["verdict"]
+				break
+		
+		result["verdict"] = verdict
+
 		del result["judge_result"]
 		del result["solution_execute"]["execute"]
 		del result["submit_execute"]["execute"]
