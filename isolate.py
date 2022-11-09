@@ -8,6 +8,86 @@ import subprocess
 import os
 from sandbox_enum import CodeType, Language
 
+
+def generate_options_with_parameter(box_id: int | None = None, time: int | None = None, wall_time: int | None = None, extra_time: int | None = None,
+    stack: int | None = None, open_files: int | None = None, fsize: int | None = None,
+    stdin: str | None = None, stdout: str | None = None, stderr: str | None = None, meta: str | None = None,
+    stderr_to_stdout: bool | None = False, max_processes: bool | None = False, 
+    share_net: bool = False, full_env: bool = False,
+    cg: bool = False, cg_mem: int | None = None, cg_timing: int | None = None
+) -> str:
+    values_options_map = {
+        "--time": time, 
+        "--wall-time": wall_time, 
+        "--extra-time": extra_time,
+        "--box-id": box_id,
+        "--stack": stack,
+        "--open-files": open_files,
+        "--fsize": fsize,
+        "--stdin": stdin,
+        "--stdout": stdout,
+        "--stderr": stderr,
+        "--cg-mem": cg_mem,
+        "--cg-timing": cg_timing,
+        "--meta": meta
+    }
+    boolean_options_map = {
+        "--stderr-to-stdout": stderr_to_stdout,
+        "--share-net": share_net,
+        "--full-env": full_env,
+        "--processes": max_processes,
+        "--cg": cg,
+    }
+
+    options = ""
+
+    for key in values_options_map.keys():
+        if values_options_map[key] == None:
+            continue
+        options += f"{key}={values_options_map[key]} "
+    
+    for key in boolean_options_map.keys():
+        if boolean_options_map[key] == False:
+            continue
+        options += f"{key} "
+    
+    return options
+
+
+def generate_isolate_run_command(
+    execute_command: str, 
+    box_id: int, 
+    wall_time: int | None = None, 
+    time: int | None = None,
+    stdin: str | None = None,
+    stdout: str | None = None,
+    meta: str  | None = None
+) -> str:
+    # --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --stdin='%d.in' --stdout='%s' --meta='%s'
+    options = generate_options_with_parameter(
+        box_id=box_id, 
+        time=time, 
+        wall_time=wall_time, 
+        full_env=True,
+        stdin=stdin,
+        stdout=stdout,
+        max_processes=True,
+        meta=meta,
+        cg=True,
+    )
+    return f"isolate {options} --run -- {execute_command}"
+
+
+def generate_isolate_init_command(box_id: int) -> str:
+    options = generate_options_with_parameter(cg=True, box_id=box_id)
+    return f"isolate {options} --init"
+
+
+def generate_isolate_cleanup_command(box_id: int) -> str:
+    options = generate_options_with_parameter(cg=True, box_id=box_id)
+    return f"isolate {options} --cleanup"
+
+
 def compile_command_generator(type, language: Language):
     java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
     type = java_type if language == Language.JAVA.value else type
@@ -28,14 +108,16 @@ def execute_command(type, langauge: Language):
     return execute_command_map[langauge]
 
 def init_sandbox(box_id=0):
-    '''j
+    '''
     Initialize the specific ID of the sandbox.
 
         Args:
             box_id: The specific ID of the sandbox
     
     '''
-    subprocess.call("isolate --cg --box-id=%d --init" % (box_id), shell=True)
+    print("Hello")
+    command = generate_isolate_init_command(box_id)
+    subprocess.call(command, shell=True)
 
 
 def touch_text_file(text, type: CodeType, language: Language, box_id=0) -> tuple:
@@ -126,7 +208,8 @@ def cleanup_sandbox(box_id=0):
             box_id: The ID of the sandbox you want to cleanup.
     
     '''
-    subprocess.call("isolate --cg --box-id=%d --cleanup" % (box_id), shell=True)
+    command = generate_isolate_cleanup_command(box_id)
+    subprocess.call(command, shell=True)
 
 
 def compile(type, language, box_id=0) -> str:
@@ -143,10 +226,10 @@ def compile(type, language, box_id=0) -> str:
     
     '''
     meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
-    compile_command = compile_command_generator(type, language) 
-    command = "isolate --cg --time=10 -p --box-id=%d --cg-mem 256000 --full-env --meta='%s' --run -- " + compile_command
+    compile_command = compile_command_generator(type, language)
+    command = generate_isolate_run_command(compile_command, box_id, time=10, meta=meta_path)
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
-    subprocess.call(command % (box_id, meta_path), shell=True)
+    subprocess.call(command, shell=True)
     return read_meta(box_id)
 
 def execute(type, test_case_count, time, wall_time, language, box_id=0) -> str:
@@ -170,11 +253,13 @@ def execute(type, test_case_count, time, wall_time, language, box_id=0) -> str:
     output = []
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
     for i in range(test_case_count):
+        input_file = "%d.in" % (i+1)
         output_file = "%d.out" % (i+1) if type == CodeType.SOLUTION.value else "%d.ans" % (i+1)
-        command = "isolate --cg --box-id=%d --time=%d --cg-mem 256000 --wall-time=%d -p --full-env --stdin='%d.in' --stdout='%s' --meta='%s' --run -- " + exec_command 
+        command = generate_isolate_run_command(exec_command, box_id, wall_time, time, input_file, output_file, meta_path)
         touch_text_file_by_file_name("", output_file, box_id)
         print("Execute testcase %d" % (i+1))
-        subprocess.call(command % (box_id, time, wall_time, i+1, output_file, meta_path), shell=True)
+        print(command)
+        subprocess.call(command, shell=True)
         meta = read_meta(box_id)
         stdout_text = read_output(i+1, type, box_id)
         output.append((meta, stdout_text))
@@ -197,7 +282,8 @@ def checker(test_case_count, time, wall_time, box_id):
     output = []
     touch_text_file("init", CodeType.META.value, Language.NONE.value, box_id)
     for i in range(test_case_count):
-        command = "isolate --cg --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --run -- %s %d.in %d.out %d.ans" % (box_id, time, wall_time, meta_path, code_output, i+1, i+1, i+1)
+        execute_command = "%s %d.in %d.out %d.ans" % (code_output, i+1, i+1, i+1)
+        command = generate_isolate_run_command(execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path)
         subprocess.call(command, shell=True)
         meta = read_meta(box_id)
         output.append(meta)
