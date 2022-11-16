@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-from flask import Flask, request, Response
-from sandbox_enum import CodeType, Language, str2Language
-from tunnel_code import TunnelCode
 import isolate
 import json
+import time
 import threading
 import traceback
 import uuid
-import time
+
 import storage_util
-import requests
 from datetime import datetime
+from sandbox_enum import CodeType, Language, str2Language
+from tunnel_code import TunnelCode
+
+import requests
+from flask import Flask, request, Response
 
 setting = json.loads(open("/etc/nuoj-sandbox/setting.json", "r").read())
 n = int(setting["sandbox_number"])
