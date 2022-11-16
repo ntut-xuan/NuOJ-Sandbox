@@ -92,6 +92,7 @@ def compile_command_generator(type, language: Language):
     java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
     type = java_type if language == Language.JAVA.value else type
     compile_command_map = {
+        Language.C.value: "/usr/bin/gcc %s.c -o %s.o" % (type, type),
         Language.CPP.value: "/usr/bin/g++ %s.cpp -o %s.o" % (type, type),
         Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/javac %s.java" % type,
         Language.PYTHON.value: "/usr/bin/echo 'Python compile skiped.'",
@@ -101,6 +102,7 @@ def compile_command_generator(type, language: Language):
 def execute_command(type, langauge: Language):
     java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
     execute_command_map = {
+        Language.C.value: "%s.o" % type,
         Language.CPP.value: "%s.o" % type,
         Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/java %s" % java_type,
         Language.PYTHON.value: "/usr/bin/python3 %s.py" % type,

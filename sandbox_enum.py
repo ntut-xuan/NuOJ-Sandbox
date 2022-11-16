@@ -9,6 +9,7 @@ class CodeType(Enum):
 
 
 class Language(Enum):
+    C = ".c"
     CPP = ".cpp"
     PYTHON = ".py"
     JAVA = ".java"
@@ -21,3 +22,5 @@ def str2Language(str):
         return Language.PYTHON
     elif str == "java":
         return Language.JAVA
+    elif str == "c":
+        return Language.C
