@@ -35,12 +35,12 @@ def service_heartbeat_test():
 # Check Sandbox working correctly.
 def sandbox_test_1():
     try:
-        post_data = {"code": open("/etc/nuoj-sandbox/example_code/code.cpp", "r").read(),
-                    "solution": open("/etc/nuoj-sandbox/example_code/solution.cpp", "r").read(),
+        post_data = {"code": open("/etc/nuoj-sandbox/example_code/code.c", "r").read(),
+                    "solution": open("/etc/nuoj-sandbox/example_code/solution.c", "r").read(),
                     "checker": open("/etc/nuoj-sandbox/example_code/checker.cpp", "r").read(), 
                     "execution": "J", 
-                    "code_language": "cpp", 
-                    "solution_language": "cpp", 
+                    "code_language": "c", 
+                    "solution_language": "c", 
                     "checker_language": "cpp",
                     "option": {"threading": False, "time": 4, "wall_time": 4}}
         
@@ -115,7 +115,7 @@ def sandbox_test_3():
         print("Failed at sandbox test #3")
         sys.exit(1)
 
-service_test()
+#service_test()
 service_heartbeat_test()
 sandbox_test_1()
 sandbox_test_2()
