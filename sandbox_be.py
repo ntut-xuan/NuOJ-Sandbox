@@ -5,10 +5,13 @@ import time
 import threading
 import traceback
 import uuid
+from dataclasses import dataclass
+from typing import Any
 
 import storage_util
+from dataclass_wizard import JSONWizard
 from datetime import datetime
-from sandbox_enum import CodeType, Language, str2Language
+from sandbox_enum import CodeType, ExecuteType, Language, str2Language
 from tunnel_code import TunnelCode
 
 import requests
@@ -23,7 +26,23 @@ available_box = set([(i + 1) for i in range(n)])
 submission_list = []
 
 
-def pop_work():
+@dataclass
+class Task(JSONWizard):
+    checker_code: str
+    checker_language: Language
+    execute_type: ExecuteType
+    options: dict[str, Any]
+    solution_code: str
+    solution_language: Language
+    user_code: str
+    user_language: Language
+
+
+def current_time_string() -> str:
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def execute_queueing_task_when_exist_empty_box():
     """
     這是一個執行序，會去找當前有沒有空的 box 可以做評測
     如果有的話，就會把提交丟到空的 box，沒有的話就會跳過，每一秒確認一次
@@ -32,12 +51,43 @@ def pop_work():
         if len(submission_list) > 0 and len(available_box) > 0:
             tracker_id = submission_list.pop(0)
             print(tracker_id)
-            thread = threading.Thread(target=do_work, kwargs={"tracker_id": tracker_id})
+            thread = threading.Thread(target=execute_task_with_specific_tracker_id, kwargs={"tracker_id": tracker_id})
             thread.start()
         time.sleep(1)
 
 
-def do_work(tracker_id):
+def fetch_test_case_from_storage() -> list[str]:
+    json_object: list[str]
+    with open("./testcase.json", "r") as f:
+        json_object = json.loads(f.read())
+    return json_object
+
+
+def initial_testlib_to_sandbox(box_id: int) -> None:
+    result = {"flow": {}}
+    
+    isolate.touch_text_file_by_file_name(open("/etc/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id)
+    result["flow"]["touch_testlib"] = current_time_string()
+
+
+def initial_code_for_prepare_sandbox(task: Task, box_id: int):
+    result = {"flow": {}}
+
+    init(task.user_code, task.user_language, CodeType.SUBMIT, box_id)
+    result["flow"]["init_code"] = current_time_string()
+
+    if task.solution_code is not None:
+        init(task.solution_code, task.solution_language, CodeType.SOLUTION, box_id)
+        result["flow"]["init_solution"] = current_time_string()
+
+    if task.checker_code is not None:
+        init(task.checker_code, task.checker_language, CodeType.CHECKER, box_id)
+        result["flow"]["init_checker"] = current_time_string()
+ 
+    initial_testlib_to_sandbox(box_id)
+
+
+def execute_task_with_specific_tracker_id(tracker_id):
     """
     這是主要處理測資評測的函數，首先會從檔案堆裡找出提交的 json file 與測資的 json file。
     接著會進行初始化、編譯、執行、評測、完成這五個動作，主要設計成盡量不要使用記憶體的空間，避免大量提交導致記憶體耗盡。
@@ -45,63 +95,36 @@ def do_work(tracker_id):
     data = json.loads(
         open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "r").read()
     )
-    option = data["option"]
-    time = option["time"]
-    wall_time = option["wall_time"]
-    user_code = data["code"]
-    test_case = json.loads(open("/etc/nuoj-sandbox/testcase.json", "r").read())
-    execution_type = data["execution"]
-    code_language = str2Language(data["code_language"])
-    solution_language = None
-    checker_language = None
-    result = {}
+    
+    task = Task.from_dict(data)
+    time = task.options["time"]
+    wall_time = task.options["wall_time"]
+    test_case = fetch_test_case_from_storage()
+    result = {"flow": {}}
 
     sem.acquire()
     box_id = available_box.pop()
 
-    result["flow"] = {}
     result["status"] = "Initing"
 
-    _, status = init(user_code, code_language.value, CodeType.SUBMIT.value, box_id)
-
-    result["flow"]["init_code"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    if "solution" in data:
-        solution_code = data["solution"]
-        solution_language = str2Language(data["solution_language"])
-        _, status = init(
-            solution_code, solution_language.value, CodeType.SOLUTION.value, box_id
-        )
-        result["flow"]["init_solution"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    if "checker" in data:
-        checker_code = data["checker"]
-        checker_language = str2Language(data["checker_language"])
-        _, status = init(
-            checker_code, checker_language.value, CodeType.CHECKER.value, box_id
-        )
-        result["flow"]["init_checker"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    isolate.touch_text_file_by_file_name(
-        open("/etc/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id
-    )
-    result["flow"]["touch_testlib"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    initial_code_for_prepare_sandbox(task, box_id)    
 
     result["status"] = "Running"
     result["flow"]["running"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     language_map = {
-        "submit_code": code_language,
-        "solution": solution_language,
-        "checker": checker_language,
+        "submit_code": task.user_language,
+        "solution": task.solution_language,
+        "checker": task.checker_language,
     }
 
-    if execution_type == "C":
+    if task.execute_type == "C":
         result["result"] = compile(language_map, CodeType.SUBMIT.value, box_id)
-    elif execution_type == "E":
+    elif task.execute_type == "E":
         result["result"] = execute(
             language_map, CodeType.SUBMIT.value, time, wall_time, test_case, box_id
         )
-    elif execution_type == "J":
+    elif task.execute_type == "J":
         result["result"] = judge(language_map, test_case, time, wall_time, box_id)
 
     result["flow"]["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -111,16 +134,16 @@ def do_work(tracker_id):
         json.dumps(result)
     )
 
-    if "webhook_url" in option:
+    if "webhook_url" in task.options:
         resp = requests.post(
-            option["webhook_url"],
+            task.options["webhook_url"],
             data=json.dumps({"status": "OK", "data": result}),
             headers={"content-type": "application/json"},
         )
         if resp.status_code != 200:
             print(
                 "webhook_url "
-                + option["webhook_url"]
+                + task.options["webhook_url"]
                 + " has error that occur result "
                 + tracker_id
                 + " has error."
@@ -130,13 +153,13 @@ def do_work(tracker_id):
             if json_data["status"] != "OK":
                 print(
                     "webhook_url "
-                    + option["webhook_url"]
+                    + task.options["webhook_url"]
                     + " has error that occur result "
                     + tracker_id
                     + " send failed."
                 )
             else:
-                print("webhook_url " + option["webhook_url"] + " send successfully")
+                print("webhook_url " + task.options["webhook_url"] + " send successfully")
 
     available_box.add(box_id)
     sem.release()
@@ -144,7 +167,7 @@ def do_work(tracker_id):
     return result
 
 
-def init(code, language, type, box_id, option=None):
+def init(code: str, language: Language, type: CodeType, box_id: int, option=None):
     """
     這是一個初始化的函數，會將沙盒初始化，並將程式碼放入沙盒。
     如果沙盒初始化了，那沙盒初始化這個動作就會被跳過。
@@ -314,8 +337,8 @@ def judge_route():
     這是一個評測的 route function，主要讓使用者將資料 POST 到機器上，機器會將資料註冊成一個 uuid4 的 tracker_id。
     """
     data = json.loads(request.data.decode("utf-8"))
-    execution_type = data["execution"]
-    option = data["option"]
+    execution_type = data["execute_type"]
+    option = data["options"]
     status = None
     tracker_id = str(uuid.uuid4())
 
@@ -327,7 +350,7 @@ def judge_route():
     if option["threading"]:
         submission_list.append(tracker_id)
     else:
-        result = do_work(tracker_id)
+        result = execute_task_with_specific_tracker_id(tracker_id)
 
     response = {"status": "OK", "type": execution_type, "tracker_id": tracker_id}
     if status == False:
@@ -405,7 +428,7 @@ def tc_fetch(problem_pid):
 
 
 if __name__ == "__main__":
-    pop_work_timer = threading.Thread(target=pop_work)
+    pop_work_timer = threading.Thread(target=execute_queueing_task_when_exist_empty_box)
     pop_work_timer.daemon = True
     pop_work_timer.start()
 
