@@ -5,13 +5,13 @@ import time
 import threading
 import traceback
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import storage_util
 from dataclass_wizard import JSONWizard
 from datetime import datetime
-from sandbox_enum import CodeType, ExecuteType, Language, str2Language
+from sandbox_enum import CodeType, ExecuteType, StatusType, Language
 from tunnel_code import TunnelCode
 
 import requests
@@ -36,9 +36,12 @@ class Task(JSONWizard):
     solution_language: Language
     user_code: str
     user_language: Language
+    flow: dict[str, Any] = field(default_factory=dict[str, Any])
+    result: dict[str, Any] = field(default_factory=dict[str, Any])
+    status: StatusType = StatusType.PENDING
 
 
-def current_time_string() -> str:
+def create_current_time_string() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -51,7 +54,10 @@ def execute_queueing_task_when_exist_empty_box():
         if len(submission_list) > 0 and len(available_box) > 0:
             tracker_id = submission_list.pop(0)
             print(tracker_id)
-            thread = threading.Thread(target=execute_task_with_specific_tracker_id, kwargs={"tracker_id": tracker_id})
+            thread = threading.Thread(
+                target=execute_task_with_specific_tracker_id,
+                kwargs={"tracker_id": tracker_id},
+            )
             thread.start()
         time.sleep(1)
 
@@ -63,81 +69,92 @@ def fetch_test_case_from_storage() -> list[str]:
     return json_object
 
 
-def initial_testlib_to_sandbox(box_id: int) -> None:
-    result = {"flow": {}}
-    
-    isolate.touch_text_file_by_file_name(open("/etc/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id)
-    result["flow"]["touch_testlib"] = current_time_string()
+def initialize_testlib_to_sandbox(box_id: int) -> None:
+    isolate.touch_text_file_by_file_name(
+        open("/etc/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id
+    )
 
 
-def initial_code_for_prepare_sandbox(task: Task, box_id: int):
-    result = {"flow": {}}
+def initialize_code_for_prepare_sandbox(task: Task, box_id: int):
+    """
+    初始化任務的程式碼移置到沙盒的動作。
+    """
 
-    init(task.user_code, task.user_language, CodeType.SUBMIT, box_id)
-    result["flow"]["init_code"] = current_time_string()
+    initilize_sandbox(box_id)
+
+    if task.user_code is not None:
+        isolate.touch_text_file(
+            task.user_code, CodeType.SUBMIT, task.user_language, box_id
+        )
+        task.flow["init_code"] = create_current_time_string()
 
     if task.solution_code is not None:
-        init(task.solution_code, task.solution_language, CodeType.SOLUTION, box_id)
-        result["flow"]["init_solution"] = current_time_string()
+        isolate.touch_text_file(
+            task.solution_code, CodeType.SOLUTION, task.solution_language, box_id
+        )
+        task.flow["init_solution"] = create_current_time_string()
 
     if task.checker_code is not None:
-        init(task.checker_code, task.checker_language, CodeType.CHECKER, box_id)
-        result["flow"]["init_checker"] = current_time_string()
- 
-    initial_testlib_to_sandbox(box_id)
+        isolate.touch_text_file(
+            task.checker_code, CodeType.CHECKER, task.checker_language, box_id
+        )
+        task.flow["init_checker"] = create_current_time_string()
+
+    initialize_testlib_to_sandbox(box_id)
+    task.flow["touch_testlib"] = create_current_time_string()
 
 
-def execute_task_with_specific_tracker_id(tracker_id):
-    """
-    這是主要處理測資評測的函數，首先會從檔案堆裡找出提交的 json file 與測資的 json file。
-    接著會進行初始化、編譯、執行、評測、完成這五個動作，主要設計成盡量不要使用記憶體的空間，避免大量提交導致記憶體耗盡。
-    """
-    data = json.loads(
-        open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "r").read()
-    )
-    
-    task = Task.from_dict(data)
-    time = task.options["time"]
-    wall_time = task.options["wall_time"]
-    test_case = fetch_test_case_from_storage()
-    result = {"flow": {}}
+def initialize_task(task: Task, box_id: int):
+    task.status = StatusType.INITIAL
+    initialize_code_for_prepare_sandbox(task, box_id)
 
-    sem.acquire()
-    box_id = available_box.pop()
 
-    result["status"] = "Initing"
-
-    initial_code_for_prepare_sandbox(task, box_id)    
-
-    result["status"] = "Running"
-    result["flow"]["running"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+def run_task(task: Task, test_case: list[str], box_id: int):
+    task.status = StatusType.RUNNING
+    task.flow["running"] = create_current_time_string()
 
     language_map = {
         "submit_code": task.user_language,
         "solution": task.solution_language,
         "checker": task.checker_language,
     }
+    time = task.options["time"]
+    wall_time = task.options["wall_time"]
 
-    if task.execute_type == "C":
-        result["result"] = compile(language_map, CodeType.SUBMIT.value, box_id)
-    elif task.execute_type == "E":
-        result["result"] = execute(
+    if task.execute_type == ExecuteType.COMPILE:
+        task.result["result"] = compile(language_map, CodeType.SUBMIT.value, box_id)
+    elif task.execute_type == ExecuteType.EXECUTE:
+        task.result["result"] = execute(
             language_map, CodeType.SUBMIT.value, time, wall_time, test_case, box_id
         )
-    elif task.execute_type == "J":
-        result["result"] = judge(language_map, test_case, time, wall_time, box_id)
+    elif task.execute_type == ExecuteType.JUDGE:
+        task.result["result"] = judge(language_map, test_case, time, wall_time, box_id)
 
-    result["flow"]["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    result["status"] = "Finished"
 
-    open("/etc/nuoj-sandbox/storage/result/%s.result" % tracker_id, "w").write(
-        json.dumps(result)
-    )
+def finish_task(task: Task):
+    task.status = StatusType.FINISH
+    task.flow["finished"] = create_current_time_string()
 
+
+def dump_task_result_to_storage(task: Task, tracker_id: int):
+    path = f"/etc/nuoj-sandbox/storage/result/{tracker_id}.result"
+
+    with open(path, "w") as f:
+        f.write(json.dumps(task.result, indent=4))
+
+
+def fetch_json_object_from_storage(tracker_id: int) -> dict[str, Any]:
+    raw_json_object: str
+    with open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "r") as f:
+        raw_json_object = f.read()
+    return json.loads(raw_json_object)
+
+
+def send_webhook_with_webhook_url(task: Task, tracker_id: int):
     if "webhook_url" in task.options:
         resp = requests.post(
             task.options["webhook_url"],
-            data=json.dumps({"status": "OK", "data": result}),
+            data=json.dumps({"status": "OK", "data": task.result}),
             headers={"content-type": "application/json"},
         )
         if resp.status_code != 200:
@@ -159,22 +176,45 @@ def execute_task_with_specific_tracker_id(tracker_id):
                     + " send failed."
                 )
             else:
-                print("webhook_url " + task.options["webhook_url"] + " send successfully")
+                print(
+                    "webhook_url " + task.options["webhook_url"] + " send successfully"
+                )
 
+
+def execute_task_with_specific_tracker_id(tracker_id):
+    """
+    這是主要處理測資評測的函數，首先會從檔案堆裡找出提交的 json file 與測資的 json file。
+    接著會進行初始化、編譯、執行、評測、完成這五個動作，主要設計成盡量不要使用記憶體的空間，避免大量提交導致記憶體耗盡。
+    """
+    data = fetch_json_object_from_storage(tracker_id)
+    task = Task.from_dict(data)
+    test_case = fetch_test_case_from_storage()
+
+    # Bind thread with acquire.
+    sem.acquire()
+    box_id = available_box.pop()
+
+    # Execute the task
+    initialize_task(task, box_id)
+    run_task(task, test_case, box_id)
+    finish_task(task)
+
+    # Store result to the storage
+    dump_task_result_to_storage(task, tracker_id)
+    send_webhook_with_webhook_url(task, tracker_id)
+
+    # Free thread with release function.
     available_box.add(box_id)
     sem.release()
     finish(box_id)
-    return result
+    return task.result
 
 
-def init(code: str, language: Language, type: CodeType, box_id: int, option=None):
+def initilize_sandbox(box_id: int, option=None):
     """
-    這是一個初始化的函數，會將沙盒初始化，並將程式碼放入沙盒。
-    如果沙盒初始化了，那沙盒初始化這個動作就會被跳過。
+    這是一個初始化的函數，會將沙盒初始化。
     """
     isolate.init_sandbox(box_id)
-    path, status = isolate.touch_text_file(code, type, language, box_id)
-    return (path, status)
 
 
 def finish(box_id):
