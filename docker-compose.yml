@@ -1,4 +1,4 @@
-version: '2.12.2'
+version: '3'
 
 services:
   sandbox:
