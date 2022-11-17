@@ -1,0 +1,16 @@
+name: Docker Compose Actions Workflow
+on: push
+jobs:
+  docker:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Start containers
+      run: docker-compose -f "docker-compose.yml" up --build --exit-code-from "sandbox-test" sandbox-test
+
+    - name: Stop containers
+      if: always()
+      run: docker-compose -f "docker-compose.yml" down

@@ -9,11 +9,24 @@ class CodeType(Enum):
 
 
 class Language(Enum):
-    C = ".c"
-    CPP = ".cpp"
-    PYTHON = ".py"
-    JAVA = ".java"
+    CPP = "cpp"
+    PYTHON = "py"
+    JAVA = "java"
     NONE = ""
+
+
+class ExecuteType(Enum):
+    COMPILE = "C"
+    EXECUTE = "E"
+    JUDGE = "J"
+
+
+class StatusType(Enum):
+    PENDING = "Pending"
+    INITIAL = "Initial"
+    RUNNING = "Running"
+    FINISH = "Finish"
+
 
 def str2Language(str):
     if str == "cpp":
@@ -22,5 +35,3 @@ def str2Language(str):
         return Language.PYTHON
     elif str == "java":
         return Language.JAVA
-    elif str == "c":
-        return Language.C
