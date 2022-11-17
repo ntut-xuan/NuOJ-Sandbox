@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  sandbox:
+    build: .
+    tty: true
+    privileged: true
+    restart: always
+    ports: 
+      - "4439:4439"
+  sandbox-test:
+    build: .
+    environment:
+      - PYTHONUNBUFFERED=1
+    privileged: true
+    depends_on:
+      - sandbox
+    command: python3 test.py
