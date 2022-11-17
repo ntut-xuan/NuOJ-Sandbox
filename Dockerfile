@@ -26,6 +26,7 @@ COPY . /etc/nuoj-sandbox/
 # install pyhton package from pip
 RUN pip3 install Flask
 RUN pip3 install requests
+RUN pip3 install dataclass_wizard
 # expose port with 4439
 EXPOSE 4439
 # execute command
