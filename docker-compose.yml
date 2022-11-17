@@ -15,4 +15,6 @@ services:
     privileged: true
     depends_on:
       - sandbox
-    command: python3 -m pytest ./backend/tests/test.py
+    command: |
+      cd backend
+      python3 -m pytest ./backend/tests/test.py
