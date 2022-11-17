@@ -9,6 +9,7 @@ class CodeType(Enum):
 
 
 class Language(Enum):
+    C = "c"
     CPP = "cpp"
     PYTHON = "py"
     JAVA = "java"
