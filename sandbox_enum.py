@@ -21,6 +21,13 @@ class ExecuteType(Enum):
     JUDGE = "J"
 
 
+class StatusType(Enum):
+    PENDING = "Pending"
+    INITIAL = "Initial"
+    RUNNING = "Running"
+    FINISH = "Finish"
+
+
 def str2Language(str):
     if str == "cpp":
         return Language.CPP
