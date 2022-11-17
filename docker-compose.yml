@@ -1,0 +1,9 @@
+version: '0.0.1'
+
+services:
+  sandbox:
+    build: .
+    tty: true
+    restart: always
+    ports: 
+      - "4439:4439"
