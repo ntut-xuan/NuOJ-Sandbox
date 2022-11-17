@@ -190,12 +190,13 @@ def execute_task_with_specific_tracker_id(tracker_id):
     task = Task.from_dict(data)
     test_case = fetch_test_case_from_storage()
 
-    # Bind thread with acquire.
+    # Bind thread with acquire
     sem.acquire()
     box_id = available_box.pop()
 
     # Execute the task
     initialize_task(task, box_id)
+    inititalize_test_case_to_sandbox(test_case, box_id)
     run_task(task, test_case, box_id)
     finish_task(task)
 
@@ -236,6 +237,11 @@ def meta_data_to_dict(meta):
     return meta_data
 
 
+def inititalize_test_case_to_sandbox(testcase: list[str], box_id: int):
+    for i in range(len(testcase)):
+        isolate.touch_text_file_by_file_name(testcase[i], "%d.in" % (i + 1), box_id)
+
+
 def compile(language_map, type, box_id, option=None):
     """
     這是一個編譯的函數，主要會將程式碼進行編譯，並回傳 meta dict。
@@ -263,8 +269,6 @@ def execute(language_map, type, time, wall_time, testcase, box_id, option=None) 
         output_data = []
         result_data = {}
         meta_data = compile(language_map, type, box_id)
-        for i in range(len(testcase)):
-            isolate.touch_text_file_by_file_name(testcase[i], "%d.in" % (i + 1), box_id)
         if meta_data["compile-result"] == "Failed":
             result_data["compile"] = meta_data
             return result_data
