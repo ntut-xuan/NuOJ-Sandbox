@@ -1,25 +1,20 @@
-#!/usr/bin/env python3
-import isolate
 import json
 import time
 import threading
 import traceback
-import uuid
 from dataclasses import dataclass, field
 from typing import Any
 
-import storage_util
-from dataclass_wizard import JSONWizard
-from datetime import datetime
-from sandbox_enum import CodeType, ExecuteType, StatusType, Language
-from tunnel_code import TunnelCode
+import utils.isolate as isolate
+from utils.sandbox_enum import CodeType, ExecuteType, StatusType, Language
 
 import requests
-from flask import Flask, request, Response
+from dataclass_wizard import JSONWizard
+from datetime import datetime
 
-setting = json.loads(open("/etc/nuoj-sandbox/setting.json", "r").read())
+
+setting = json.loads(open("./setting.json", "r").read())
 n = int(setting["sandbox_number"])
-app = Flask(__name__)
 sem = threading.Semaphore(n)
 result_map = {}
 available_box = set([(i + 1) for i in range(n)])
@@ -71,7 +66,7 @@ def fetch_test_case_from_storage() -> list[str]:
 
 def initialize_testlib_to_sandbox(box_id: int) -> None:
     isolate.touch_text_file_by_file_name(
-        open("/etc/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id
+        open("/etc/nuoj-sandbox/backend/testlib.h", "r").read(), "testlib.h", box_id
     )
 
 
@@ -349,132 +344,3 @@ def judge(language_map, testcase, time, wall_time, box_id, option=None):
     except Exception as e:
         print(traceback.format_exc())
         return (str(traceback.format_exc()), False)
-
-
-@app.route("/heartbeat", methods=["GET"])
-def heartbeat():
-    """
-    這是一個心跳的 route function，主要會讓連接的機器確認是否活著，並且會回傳當前 judge server 的 core 與正在等待的評測數量。
-    """
-    result = {
-        "status": "OK",
-        "free_worker": len(available_box),
-        "waiting_task": len(submission_list),
-    }
-    return Response(json.dumps(result), mimetype="application/json")
-
-
-@app.route("/result/<uuid>/", methods=["GET"])
-def result_return(uuid):
-    """
-    這是一個回傳的 route function，主要拿來獲取某個評測 uuid 的結果。
-    """
-    result = json.loads(
-        open("/etc/nuoj-sandbox/storage/result/%s.result" % (uuid)).read()
-    )
-    return Response(json.dumps(result), mimetype="application/json")
-
-
-@app.route("/judge", methods=["POST"])
-def judge_route():
-    """
-    這是一個評測的 route function，主要讓使用者將資料 POST 到機器上，機器會將資料註冊成一個 uuid4 的 tracker_id。
-    """
-    data = json.loads(request.data.decode("utf-8"))
-    execution_type = data["execute_type"]
-    option = data["options"]
-    status = None
-    tracker_id = str(uuid.uuid4())
-
-    open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "w").write(
-        json.dumps(data)
-    )
-    del data
-
-    if option["threading"]:
-        submission_list.append(tracker_id)
-    else:
-        result = execute_task_with_specific_tracker_id(tracker_id)
-
-    response = {"status": "OK", "type": execution_type, "tracker_id": tracker_id}
-    if status == False:
-        response["status"] = "Failed"
-
-    if not option["threading"]:
-        response["result"] = result
-
-    return Response(json.dumps(response), mimetype="application/json")
-
-
-@app.route("/tc_upload", methods=["POST"])
-def tc_upload():
-    """
-    用於上傳測資的接口
-    """
-    data = request.json
-
-    # fetch data
-    problem_pid = data["problem_pid"]
-    testcase_data = bytes(data["chunk"])
-
-    # write file to back
-    path = "/etc/nuoj-sandbox/storage/%s/%s" % (
-        TunnelCode.TESTCASE.value,
-        problem_pid + ".json",
-    )
-    with open(path, "ab") as file:
-        file.write(testcase_data)
-
-    return Response(json.dumps({"status": "OK"}), mimetype="application/json")
-
-
-@app.route("/tc_fetch/<problem_pid>/", methods=["POST"])
-def tc_fetch(problem_pid):
-    """
-    用於取得測資的部分，以及取得測資的數量
-    """
-    if (
-        storage_util.file_storage_tunnel_exist(
-            problem_pid + ".json", TunnelCode.TESTCASE
-        )
-        == False
-    ):
-        return Response(
-            json.dumps(
-                {
-                    "status": "Failed",
-                    "message": "testcase " + problem_pid + " not exist",
-                }
-            ),
-            mimetype="application/json",
-        )
-
-    testcase_raw = storage_util.file_storage_tunnel_read(
-        problem_pid + ".json", TunnelCode.TESTCASE
-    )
-    testcase_json_data = None
-
-    try:
-        testcase_json_data = json.loads(testcase_raw)
-    except ValueError:
-        return Response(
-            json.dumps(
-                {
-                    "status": "Failed",
-                    "message": "testcase " + problem_pid + " is broken",
-                }
-            ),
-            mimetype="application/json",
-        )
-
-    data = {"status": "OK", "data": {"testcase_count": len(testcase_json_data)}}
-    return Response(json.dumps(data), mimetype="application/json")
-
-
-if __name__ == "__main__":
-    pop_work_timer = threading.Thread(target=execute_queueing_task_when_exist_empty_box)
-    pop_work_timer.daemon = True
-    pop_work_timer.start()
-
-    app.debug = True
-    app.run(host="0.0.0.0", port=setting["port"], threaded=True)

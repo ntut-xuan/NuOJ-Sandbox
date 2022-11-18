@@ -6,7 +6,7 @@ Due to isolate is a command-execute program, so you can use this tool if you wan
 
 import subprocess
 import os
-from sandbox_enum import CodeType, Language
+from .sandbox_enum import CodeType, Language
 
 
 def generate_options_with_parameter(box_id: int | None = None, time: int | None = None, wall_time: int | None = None, extra_time: int | None = None,
