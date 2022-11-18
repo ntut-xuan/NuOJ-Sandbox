@@ -12,6 +12,7 @@ class Language(Enum):
     CPP = "cpp"
     PYTHON = "py"
     JAVA = "java"
+    GO = "go"
     NONE = ""
 
 

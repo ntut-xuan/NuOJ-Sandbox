@@ -73,6 +73,30 @@ class TestJudge:
 
         for data in response_data["result"]["result"]["report"]:
             assert data["verdict"] == "AC"
+            
+    def test_sandbox_with_golang_submit(self, client: Flask):
+        post_data = {
+            "user_code": open("/etc/nuoj-sandbox/example_code/code.go", "r").read(),
+            "solution_code": open("/etc/nuoj-sandbox/example_code/solution.go", "r").read(),
+            "checker_code": open("/etc/nuoj-sandbox/example_code/checker.cpp", "r").read(),
+            "test_case": [
+                {
+                    "use": "plain-text",
+                    "text": "8"
+                }
+            ],
+            "execute_type": "J", 
+            "user_language": "go", 
+            "solution_language": "go", 
+            "checker_language": "cpp",
+            "options": {"threading": False, "time": 4, "wall_time": 4}
+        }
+        
+        req = client.post("/judge" ,data=json.dumps(post_data))
+        response_data = json.loads(req.data)
+
+        for data in response_data["result"]["result"]["report"]:
+            assert data["verdict"] == "AC"
 
     def test_sandbox_with_testcase_payload(self, client: Flask):
         post_data = {

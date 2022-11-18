@@ -95,6 +95,7 @@ def compile_command_generator(type, language: Language):
         Language.CPP.value: "/usr/bin/g++ %s.cpp -o %s.o" % (type, type),
         Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/javac %s.java" % type,
         Language.PYTHON.value: "/usr/bin/echo 'Python compile skiped.'",
+        Language.GO.value: "/usr/bin/echo 'Golang compile skiped.'",
     }
     return compile_command_map[language]
 
@@ -104,6 +105,7 @@ def execute_command(type, langauge: Language):
         Language.CPP.value: "%s.o" % type,
         Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/java %s" % java_type,
         Language.PYTHON.value: "/usr/bin/python3 %s.py" % type,
+        Language.GO.value: "/usr/bin/go run %s.go" % type,
     }
     return execute_command_map[langauge]
 
