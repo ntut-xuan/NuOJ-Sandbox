@@ -27,6 +27,10 @@ class StatusType(Enum):
     RUNNING = "Running"
     FINISH = "Finish"
 
+class TestCaseType(Enum):
+    STATIC_FILE = "static-file"
+    PLAIN_TEXT = "plain-text"
+
 
 def str2Language(str):
     if str == "cpp":

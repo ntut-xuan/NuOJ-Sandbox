@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import utils.isolate as isolate
-from utils.sandbox_enum import CodeType, ExecuteType, StatusType, Language
+from utils.sandbox_enum import CodeType, ExecuteType, StatusType, TestCaseType, Language
 
 import requests
 from dataclass_wizard import JSONWizard
@@ -22,6 +22,13 @@ submission_list = []
 
 
 @dataclass
+class TestCase(JSONWizard):
+    use: TestCaseType
+    text: str = field(default_factory=str)
+    file: str = field(default_factory=str)
+    
+
+@dataclass
 class Task(JSONWizard):
     checker_code: str
     checker_language: Language
@@ -29,6 +36,7 @@ class Task(JSONWizard):
     options: dict[str, Any]
     solution_code: str
     solution_language: Language
+    test_case: list[TestCase]
     user_code: str
     user_language: Language
     flow: dict[str, Any] = field(default_factory=dict[str, Any])
@@ -57,9 +65,9 @@ def execute_queueing_task_when_exist_empty_box():
         time.sleep(1)
 
 
-def fetch_test_case_from_storage() -> list[str]:
+def fetch_test_case_from_storage(filename: str) -> list[str]:
     json_object: list[str]
-    with open("./testcase.json", "r") as f:
+    with open(f"/etc/nuoj-sandbox/storage/testcase/{filename}.json", "r") as f:
         json_object = json.loads(f.read())
     return json_object
 
@@ -183,7 +191,7 @@ def execute_task_with_specific_tracker_id(tracker_id):
     """
     data = fetch_json_object_from_storage(tracker_id)
     task = Task.from_dict(data)
-    test_case = fetch_test_case_from_storage()
+    test_case: list[TestCase] = task.test_case
 
     # Bind thread with acquire
     sem.acquire()
@@ -191,7 +199,7 @@ def execute_task_with_specific_tracker_id(tracker_id):
 
     # Execute the task
     initialize_task(task, box_id)
-    inititalize_test_case_to_sandbox(test_case, box_id)
+    initialize_test_case_to_sandbox(test_case, box_id)
     run_task(task, test_case, box_id)
     finish_task(task)
 
@@ -232,9 +240,26 @@ def meta_data_to_dict(meta):
     return meta_data
 
 
-def inititalize_test_case_to_sandbox(testcase: list[str], box_id: int):
-    for i in range(len(testcase)):
-        isolate.touch_text_file_by_file_name(testcase[i], "%d.in" % (i + 1), box_id)
+def initialize_test_case_from_storage_and_return_last_index(filename: str, start_index: int, box_id: int) -> int:
+    test_case_list: list[str] = fetch_test_case_from_storage(filename)
+    for i in range(len(test_case_list)):
+        isolate.touch_text_file_by_file_name(test_case_list[i], f"{i + start_index}.in", box_id)
+    return start_index + len(test_case_list)
+
+
+def initialize_test_case_from_plain_text_and_return_last_index(text: str, start_index: int, box_id: int) -> int:
+    isolate.touch_text_file_by_file_name(text, f"{start_index}.in", box_id)
+    return start_index + 1
+
+
+def initialize_test_case_to_sandbox(test_case_list: list[TestCase], box_id: int):
+    index = 1
+    for i in range(len(test_case_list)):
+        test_case_object: TestCase = test_case_list[i]
+        if test_case_object.use == TestCaseType.STATIC_FILE:
+            index = initialize_test_case_from_storage_and_return_last_index(test_case_object.file, index, box_id)
+        else:
+            index = initialize_test_case_from_plain_text_and_return_last_index(test_case_object.text, index, box_id)
 
 
 def compile(language_map, type, box_id, option=None):
