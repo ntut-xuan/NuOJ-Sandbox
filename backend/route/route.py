@@ -6,8 +6,9 @@ from typing import Any
 
 import utils.isolate as isolate
 import utils.storage_util as storage_util
-from utils.tunnel_code import TunnelCode
+from utils.route_util import check_test_case_field_should_have_correct_data
 from utils.sandbox_util import available_box, submission_list, execute_task_with_specific_tracker_id
+from utils.tunnel_code import TunnelCode
 
 from dataclass_wizard import JSONWizard
 from datetime import datetime
@@ -49,6 +50,9 @@ def judge_route():
     option = data["options"]
     status = None
     tracker_id = str(uuid.uuid4())
+
+    if not check_test_case_field_should_have_correct_data(data["test_case"]):
+        return Response({"status": "Failed", "Message": "Wrong test case payload."}, mimetype="application/json", status=400)
 
     open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "w").write(
         json.dumps(data)
