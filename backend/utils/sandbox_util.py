@@ -66,7 +66,7 @@ def fetch_test_case_from_storage() -> list[str]:
 
 def initialize_testlib_to_sandbox(box_id: int) -> None:
     isolate.touch_text_file_by_file_name(
-        open("/etc/nuoj-sandbox/testlib.h", "r").read(), "testlib.h", box_id
+        open("/etc/nuoj-sandbox/backend/testlib.h", "r").read(), "testlib.h", box_id
     )
 
 
