@@ -15,6 +15,6 @@ services:
     privileged: true
     depends_on:
       - sandbox
-    working_dir: /backend
+    working_dir: /etc/nuoj-sandbox/backend
     command:
-      python3 -m pytest ./tests/test.py
+      python3 -m pytest --no-header -vv ./tests/test.py
