@@ -14,7 +14,8 @@ def generate_options_with_parameter(box_id: int | None = None, time: int | None 
     stdin: str | None = None, stdout: str | None = None, stderr: str | None = None, meta: str | None = None,
     stderr_to_stdout: bool | None = False, max_processes: bool | None = False, 
     share_net: bool = False, full_env: bool = False,
-    cg: bool = False, cg_mem: int | None = None, cg_timing: int | None = None
+    cg: bool = False, cg_mem: int | None = None, cg_timing: int | None = None,
+    dir: tuple[str, str] = None,
 ) -> str:
     values_options_map = {
         "--time": time, 
@@ -50,6 +51,9 @@ def generate_options_with_parameter(box_id: int | None = None, time: int | None 
         if boolean_options_map[key] == False:
             continue
         options += f"{key} "
+        
+    if dir is not None:
+        options += f"--dir={dir[0]}:{dir[1]} "
     
     return options
 
@@ -61,7 +65,7 @@ def generate_isolate_run_command(
     time: int | None = None,
     stdin: str | None = None,
     stdout: str | None = None,
-    meta: str  | None = None
+    meta: str  | None = None,
 ) -> str:
     # --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --stdin='%d.in' --stdout='%s' --meta='%s'
     options = generate_options_with_parameter(
@@ -73,7 +77,9 @@ def generate_isolate_run_command(
         stdout=stdout,
         max_processes=True,
         meta=meta,
+        open_files=2048,
         cg=True,
+        dir=("/root/.cache/go-build", "tmp"),
     )
     return f"isolate {options} --run -- {execute_command}"
 
@@ -95,7 +101,7 @@ def compile_command_generator(type, language: Language):
         Language.CPP.value: "/usr/bin/g++ %s.cpp -o %s.o" % (type, type),
         Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/javac %s.java" % type,
         Language.PYTHON.value: "/usr/bin/echo 'Python compile skiped.'",
-        Language.GO.value: "/usr/bin/echo 'Golang compile skiped.'",
+        Language.GO.value: f"/usr/bin/go build -o {type}.o {type}.go",
     }
     return compile_command_map[language]
 
@@ -105,7 +111,7 @@ def execute_command(type, langauge: Language):
         Language.CPP.value: "%s.o" % type,
         Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/java %s" % java_type,
         Language.PYTHON.value: "/usr/bin/python3 %s.py" % type,
-        Language.GO.value: "/usr/bin/go run %s.go" % type,
+        Language.GO.value: f"{type}.o",
     }
     return execute_command_map[langauge]
 
