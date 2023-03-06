@@ -4,5 +4,136 @@
         "title": "NuOJ-Sandbox API Documentation",
         "description": "This is the NuOJ-Sandbox API Documentation based on the OpenAPI 3.0 specification.",
         "version": "0.1.0"
+    },
+    "tags": [
+        {
+            "name": "sandbox",
+            "description": "The API about the sandbox."
+        }
+    ],
+    "paths": {
+        "/judge": {
+            "get": {
+                "tags": ["sandbox"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#components/schemas/judge_payload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#components/schemas/judge_response"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "judge_payload": {
+                "type": "object",
+                "properties": {
+                    "user_code": {
+                        "type": "object",
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "example": "#include<bits/stdc++.h> ..."
+                            },
+                            "language": {
+                                "type": "string",
+                                "example": "cpp"
+                            }
+                        }
+                    },
+                    "solution_code": {
+                        "type": "object",
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "example": "#include<bits/stdc++.h> ..."
+                            },
+                            "language": {
+                                "type": "string",
+                                "example": "cpp"
+                            }
+                        }
+                    },
+                    "checker_code": {
+                        "type": "object",
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "example": "#include<bits/stdc++.h> ..."
+                            },
+                            "language": {
+                                "type": "string",
+                                "example": "cpp"
+                            }
+                        }
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": ["Judge", "Compile", "Execute"],
+                        "example": "Judge"
+                    },
+                    "options": {
+                        "type": "object",
+                        "properties": {
+                            "threading": {
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "time": {
+                                "type": "integer",
+                                "example": 4
+                            },
+                            "wall_time": {
+                                "type": "integer",
+                                "example": 4
+                            }
+                        }
+                    }
+                }
+            },
+            "judge_response": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "OK"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": ["Judge", "Compile", "Execute"],
+                        "example": "Judge"
+                    },
+                    "tracker_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "exmaple": "f2aa9a22-8869-4cc8-812c-ca6ea7adb406"
+                    },
+                    "result": {
+                        "$ref": "#components/schemas/judge_result"
+                    }
+                }
+            },
+            "judge_result": {
+                "type": "string",
+                "example": "WIP"
+            }
+        }
     }
 }
