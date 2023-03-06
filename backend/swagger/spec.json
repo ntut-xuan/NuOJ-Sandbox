@@ -123,7 +123,7 @@
                     "tracker_id": {
                         "type": "string",
                         "format": "uuid",
-                        "exmaple": "f2aa9a22-8869-4cc8-812c-ca6ea7adb406"
+                        "example": "f2aa9a22-8869-4cc8-812c-ca6ea7adb406"
                     },
                     "result": {
                         "$ref": "#components/schemas/judge_result"
@@ -131,8 +131,77 @@
                 }
             },
             "judge_result": {
-                "type": "string",
-                "example": "WIP"
+                "type": "object",
+                "properties": {
+                    "check_compile": {
+                        "$ref": "#/components/schemas/judge_metadata"
+                    },
+                    "solution_compile": {
+                        "$ref": "#/components/schemas/judge_metadata"
+                    },
+                    "submit_compile": {
+                        "$ref": "#/components/schemas/judge_metadata"
+                    },
+                    "result": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "verdict": {
+                                    "type": "string",
+                                    "enum": ["AC", "WA", "TLE", "MLE", "RE", "SE"],
+                                    "example": "OK"
+                                },
+                                "time": {
+                                    "type": "number",
+                                    "example": 0.001
+                                },
+                                "memory": {
+                                    "type": "number",
+                                    "example": 177652
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "judge_metadata": {
+                "type": "object",
+                "properties": {
+                    "time": {
+                        "type": "number",
+                        "example": 1.12
+                    },
+                    "time-wall": {
+                        "type": "number",
+                        "example": 1.12
+                    },
+                    "max-rss": {
+                        "type": "number",
+                        "example": 178884
+                    },
+                    "csw-voluntary": {
+                        "type": "number",
+                        "example": 16
+                    },
+                    "csw-forced": {
+                        "type": "number",
+                        "example": 23
+                    },
+                    "cg-mem": {
+                        "type": "number",
+                        "example": 162264
+                    },
+                    "exitcode": {
+                        "type": "number",
+                        "example": 0
+                    },
+                    "compile-result": {
+                        "type": "string",
+                        "enum": ["OK", "FAIL"],
+                        "example": "OK"
+                    }
+                }
             }
         }
     }
