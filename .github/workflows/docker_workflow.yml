@@ -8,6 +8,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
+    - name: Check Control Group
+      run: |
+        cd /sys/fs/cgroup
+        ls
+
     - name: Start containers
       run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
 
