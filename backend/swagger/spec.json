@@ -1,0 +1,8 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "NuOJ-Sandbox API Documentation",
+        "description": "This is the NuOJ-Sandbox API Documentation based on the OpenAPI 3.0 specification.",
+        "version": "0.1.0"
+    }
+}
