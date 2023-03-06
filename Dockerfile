@@ -31,4 +31,5 @@ RUN pip3 install pytest
 # expose port with 4439
 EXPOSE 4439
 # execute command
-CMD python3 sandbox_be.py
+WORKDIR /etc/nuoj-sandbox/backend
+CMD flask --debug run --host 0.0.0.0 --port 4439
