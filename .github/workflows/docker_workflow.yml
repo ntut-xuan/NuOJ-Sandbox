@@ -10,7 +10,7 @@ jobs:
 
     - name: Check Control Group
       run: |
-        cd /sys/fs/cgroup
+        cd /sys/fs/cgroup/memory
         ls
 
     - name: Start containers
