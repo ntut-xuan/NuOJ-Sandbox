@@ -18,4 +18,4 @@ jobs:
 
     - name: Stop containers
       if: always()
-      run: docker compose up down
+      run: docker compose down -v
