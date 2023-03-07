@@ -44,7 +44,7 @@ class TestJudge:
             "options": {"threading": False, "time": 4, "wall_time": 4},
         }
 
-        req = client.post("/judge", data=json.dumps(post_data))
+        req = client.post("/api/judge", data=json.dumps(post_data))
         response_data = json.loads(req.data)
 
         for data in response_data["result"]["result"]["report"]:
@@ -67,7 +67,7 @@ class TestJudge:
             "options": {"threading": False, "time": 4, "wall_time": 4},
         }
 
-        req = client.post("/judge", data=json.dumps(post_data))
+        req = client.post("/api/judge", data=json.dumps(post_data))
         response_data = json.loads(req.data)
 
         for data in response_data["result"]["result"]["report"]:
@@ -90,7 +90,7 @@ class TestJudge:
             "options": {"threading": False, "time": 4, "wall_time": 4},
         }
 
-        req = client.post("/judge", data=json.dumps(post_data))
+        req = client.post("/api/judge", data=json.dumps(post_data))
         response_data = json.loads(req.data)
 
         for data in response_data["result"]["result"]["report"]:
@@ -113,7 +113,7 @@ class TestJudge:
             "options": {"threading": False, "time": 4, "wall_time": 4},
         }
 
-        req = client.post("/judge", data=json.dumps(post_data))
+        req = client.post("/api/judge", data=json.dumps(post_data))
         response_data = json.loads(req.data)
 
         for data in response_data["result"]["result"]["report"]:
@@ -136,6 +136,6 @@ class TestJudge:
             "options": {"threading": False, "time": 4, "wall_time": 4},
         }
 
-        req = client.post("/judge", data=json.dumps(post_data))
+        req = client.post("/api/judge", data=json.dumps(post_data))
 
         assert req.status_code == 400

@@ -5,8 +5,14 @@ import traceback
 from dataclasses import dataclass, field
 from typing import Any
 
-import utils.isolate as isolate
-from utils.sandbox_enum import CodeType, ExecuteType, StatusType, TestCaseType, Language
+import api.judge.isolate as isolate
+from api.judge.sandbox_enum import (
+    CodeType,
+    ExecuteType,
+    StatusType,
+    TestCaseType,
+    Language,
+)
 
 import requests
 from dataclass_wizard import JSONWizard

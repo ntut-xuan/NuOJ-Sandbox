@@ -1,6 +1,6 @@
 from typing import Any
 
-from utils.sandbox_enum import TestCaseType
+from api.judge.sandbox_enum import TestCaseType
 
 
 def check_test_case_field_should_have_correct_data(
