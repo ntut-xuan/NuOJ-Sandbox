@@ -5,6 +5,7 @@ from flask import Blueprint, make_response
 
 swagger_bp = Blueprint("swagger", __name__)
 
+
 @swagger_bp.route("/swagger_spec")
 def fetch_swagger_spec_route():
     swagger_spec: str = None

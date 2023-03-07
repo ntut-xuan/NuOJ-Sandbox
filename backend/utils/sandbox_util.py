@@ -26,7 +26,7 @@ class TestCase(JSONWizard):
     use: TestCaseType
     text: str = field(default_factory=str)
     file: str = field(default_factory=str)
-    
+
 
 @dataclass
 class Task(JSONWizard):
@@ -240,14 +240,20 @@ def meta_data_to_dict(meta):
     return meta_data
 
 
-def initialize_test_case_from_storage_and_return_last_index(filename: str, start_index: int, box_id: int) -> int:
+def initialize_test_case_from_storage_and_return_last_index(
+    filename: str, start_index: int, box_id: int
+) -> int:
     test_case_list: list[str] = fetch_test_case_from_storage(filename)
     for i in range(len(test_case_list)):
-        isolate.touch_text_file_by_file_name(test_case_list[i], f"{i + start_index}.in", box_id)
+        isolate.touch_text_file_by_file_name(
+            test_case_list[i], f"{i + start_index}.in", box_id
+        )
     return start_index + len(test_case_list)
 
 
-def initialize_test_case_from_plain_text_and_return_last_index(text: str, start_index: int, box_id: int) -> int:
+def initialize_test_case_from_plain_text_and_return_last_index(
+    text: str, start_index: int, box_id: int
+) -> int:
     isolate.touch_text_file_by_file_name(text, f"{start_index}.in", box_id)
     return start_index + 1
 
@@ -257,9 +263,13 @@ def initialize_test_case_to_sandbox(test_case_list: list[TestCase], box_id: int)
     for i in range(len(test_case_list)):
         test_case_object: TestCase = test_case_list[i]
         if test_case_object.use == TestCaseType.STATIC_FILE:
-            index = initialize_test_case_from_storage_and_return_last_index(test_case_object.file, index, box_id)
+            index = initialize_test_case_from_storage_and_return_last_index(
+                test_case_object.file, index, box_id
+            )
         else:
-            index = initialize_test_case_from_plain_text_and_return_last_index(test_case_object.text, index, box_id)
+            index = initialize_test_case_from_plain_text_and_return_last_index(
+                test_case_object.text, index, box_id
+            )
 
 
 def compile(language_map, type, box_id, option=None):
