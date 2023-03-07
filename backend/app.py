@@ -17,9 +17,14 @@ from setting.util import Setting, SettingBuilder
 from flask import Flask
 
 
-def create_app(config_filename=None) -> Flask:
+def create_app(config_mapping: dict[str, str] = None) -> Flask:
     app = Flask(__name__)
     
+    if config_mapping is not None:
+        app.config.from_mapping(config_mapping)
+    else:
+        app.config.from_pyfile("config.py")
+        
     app.config["setting"] = SettingBuilder().from_file("setting.json")
     
     app.register_blueprint(judge_api_bp)

@@ -36,7 +36,7 @@ class TestJudge:
             "checker_code": open(
                 "/etc/nuoj-sandbox/example_code/checker.cpp", "r"
             ).read(),
-            "test_case": [{"use": "static-file", "file": "testcase"}],
+            "test_case": [{"use": "plain-text", "text": "4 1 2 3 4"}],
             "execute_type": "J",
             "user_language": "cpp",
             "solution_language": "cpp",
@@ -59,7 +59,7 @@ class TestJudge:
             "checker_code": open(
                 "/etc/nuoj-sandbox/example_code/checker.cpp", "r"
             ).read(),
-            "test_case": [{"use": "static-file", "file": "testcase"}],
+            "test_case": [{"use": "plain-text", "text": "4 1"}],
             "execute_type": "J",
             "user_language": "py",
             "solution_language": "py",

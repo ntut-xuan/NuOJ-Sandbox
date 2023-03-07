@@ -1,7 +1,8 @@
 import json
 import uuid
 
-from flask import Blueprint, Response, request
+from flask import Blueprint, Response, current_app, request
+
 from api.judge.sandbox_util import (
     execute_task_with_specific_tracker_id,
     submission_list,
@@ -29,7 +30,8 @@ def judge_route():
             status=400,
         )
 
-    open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "w").write(
+    storage_path: str = current_app.config["STORAGE_PATH"]
+    open(f"{storage_path}/submission/{tracker_id}.json", "w").write(
         json.dumps(data)
     )
     del data
