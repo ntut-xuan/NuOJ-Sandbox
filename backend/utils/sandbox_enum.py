@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class CodeType(Enum):
     SUBMIT = "submit_code"
     SOLUTION = "solution"
@@ -27,6 +28,7 @@ class StatusType(Enum):
     INITIAL = "Initial"
     RUNNING = "Running"
     FINISH = "Finish"
+
 
 class TestCaseType(Enum):
     STATIC_FILE = "static-file"
