@@ -12,12 +12,16 @@ from api.swagger.route import swagger_api_bp
 from api.system.route import system_api_bp
 from api.test_case.route import test_case_api_bp
 from api.judge.sandbox_util import execute_queueing_task_when_exist_empty_box
+from setting.util import Setting, SettingBuilder
 
 from flask import Flask
 
 
 def create_app(config_filename=None) -> Flask:
     app = Flask(__name__)
+    
+    app.config["setting"] = SettingBuilder().from_file("setting.json")
+    
     app.register_blueprint(judge_api_bp)
     app.register_blueprint(result_api_bp)
     app.register_blueprint(swagger_api_bp)
