@@ -17,6 +17,7 @@ from api.judge.sandbox_enum import (
 import requests
 from dataclass_wizard import JSONWizard
 from datetime import datetime
+from flask import current_app
 
 
 setting = json.loads(open("./setting.json", "r").read())
@@ -73,7 +74,8 @@ def execute_queueing_task_when_exist_empty_box():
 
 def fetch_test_case_from_storage(filename: str) -> list[str]:
     json_object: list[str]
-    with open(f"/etc/nuoj-sandbox/storage/testcase/{filename}.json", "r") as f:
+    storage_path: str = current_app.config["STORAGE_PATH"]
+    with open(f"{storage_path}/testcase/{filename}.json", "r") as f:
         json_object = json.loads(f.read())
     return json_object
 
@@ -146,7 +148,8 @@ def finish_task(task: Task):
 
 
 def dump_task_result_to_storage(task: Task, tracker_id: int):
-    path = f"/etc/nuoj-sandbox/storage/result/{tracker_id}.result"
+    storage_path: str = current_app.config["STORAGE_PATH"]
+    path = f"{storage_path}/result/{tracker_id}.result"
 
     with open(path, "w") as f:
         f.write(json.dumps(task.result, indent=4))
@@ -154,7 +157,8 @@ def dump_task_result_to_storage(task: Task, tracker_id: int):
 
 def fetch_json_object_from_storage(tracker_id: int) -> dict[str, Any]:
     raw_json_object: str
-    with open("/etc/nuoj-sandbox/storage/submission/%s.json" % tracker_id, "r") as f:
+    storage_path: str = current_app.config["STORAGE_PATH"]
+    with open(f"{storage_path}/submission/{tracker_id}.json") as f:
         raw_json_object = f.read()
     return json.loads(raw_json_object)
 
