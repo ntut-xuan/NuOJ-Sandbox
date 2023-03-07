@@ -2,7 +2,7 @@ import json
 
 from flask import Blueprint, Response
 
-from utils.sandbox_util import available_box, submission_list
+from api.judge.sandbox_util import available_box, submission_list
 
 system_api_bp = Blueprint("system", __name__)
 

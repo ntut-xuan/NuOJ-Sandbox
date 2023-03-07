@@ -2,8 +2,11 @@ import json
 import uuid
 
 from flask import Blueprint, Response, request
-from utils.sandbox_util import execute_task_with_specific_tracker_id, submission_list
-from utils.route_util import check_test_case_field_should_have_correct_data
+from api.judge.sandbox_util import (
+    execute_task_with_specific_tracker_id,
+    submission_list,
+)
+from api.judge.route_util import check_test_case_field_should_have_correct_data
 
 judge_api_bp = Blueprint("judge", __name__, url_prefix="/api/judge")
 

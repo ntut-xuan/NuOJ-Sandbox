@@ -1,5 +1,5 @@
 import os
-from .tunnel_code import TunnelCode
+from storage.tunnel_code import TunnelCode
 
 
 def file_storage_tunnel_exist(filename: str, tunnel: TunnelCode) -> bool:

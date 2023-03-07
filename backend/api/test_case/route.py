@@ -1,7 +1,7 @@
 import json
 
 from flask import Blueprint, Response, request
-from utils.storage_util import (
+from storage.util import (
     TunnelCode,
     file_storage_tunnel_exist,
     file_storage_tunnel_read,
