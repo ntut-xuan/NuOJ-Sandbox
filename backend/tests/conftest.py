@@ -1,7 +1,7 @@
 import pytest
 
 from app import create_app
-
+from setting.util import Setting, SettingBuilder
 
 @pytest.fixture()
 def app():
@@ -11,6 +11,9 @@ def app():
             "TESTING": True,
         }
     )
+    
+    with app.app_context():
+        app.config["setting"] = SettingBuilder().from_mapping({"sandbox_number": 1})
 
     # other setup can go here
 
