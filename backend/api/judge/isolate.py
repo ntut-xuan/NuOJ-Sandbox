@@ -107,7 +107,7 @@ def generate_isolate_cleanup_command(box_id: int) -> str:
     return f"isolate {options} --cleanup"
 
 
-def compile_command_generator(type, language: Language):
+def compile_command_generator(type, language: str):
     java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
     type = java_type if language == Language.JAVA.value else type
     compile_command_map = {
@@ -142,7 +142,7 @@ def init_sandbox(box_id=0):
     subprocess.call(command, shell=True)
 
 
-def touch_text_file(text, type: CodeType, language: Language, box_id=0) -> tuple:
+def touch_text_file(text, type: CodeType, compiler: str, box_id=0) -> tuple:
     """
     Create a new text file and write text.
 
@@ -159,8 +159,8 @@ def touch_text_file(text, type: CodeType, language: Language, box_id=0) -> tuple
 
     """
     java_type = "Main" if type == CodeType.SUBMIT else "Solution"
-    type = java_type if language == Language.JAVA else type
-    path = "/var/local/lib/isolate/%d/box/%s.%s" % (box_id, type.value, language.value)
+    type = java_type if compiler == Language.JAVA.value else type
+    path = "/var/local/lib/isolate/%d/box/%s.%s" % (box_id, type.value, compiler)
     print("create file at", path)
     with open(path, "w") as code_file:
         code_file.write(text)
@@ -203,7 +203,7 @@ def read_meta(box_id=0) -> str:
             A string, the text of meta file on the specific ID of the sandbox.
 
     """
-    meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
+    meta_path = "/var/local/lib/isolate/%d/box/meta.mt" % (box_id)
     with open(meta_path, "r") as code_file:
         return code_file.read()
 
@@ -255,17 +255,17 @@ def compile(type, language, box_id=0) -> str:
             A string of results on the meta file after finished compiled.
 
     """
-    meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
+    meta_path = "/var/local/lib/isolate/%d/box/meta.mt" % (box_id)
     compile_command = compile_command_generator(type, language)
     command = generate_isolate_run_command(
         compile_command, box_id, time=10, meta=meta_path
     )
-    touch_text_file("init", CodeType.META, Language.NONE, box_id)
+    touch_text_file("init", CodeType.META, "mt", box_id)
     subprocess.call(command, shell=True)
     return read_meta(box_id)
 
 
-def execute(type, test_case_count, time, wall_time, language, box_id=0) -> str:
+def execute(type, test_case_index, time, wall_time, language, box_id=0) -> str:
     """
     Execute the program on the specific ID of the sandbox.
 
@@ -282,29 +282,25 @@ def execute(type, test_case_count, time, wall_time, language, box_id=0) -> str:
 
     """
     exec_command = execute_command(type, language)
-    meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
-    output = []
-    touch_text_file("init", CodeType.META, Language.NONE, box_id)
-    for i in range(test_case_count):
-        input_file = "%d.in" % (i + 1)
-        output_file = (
-            "%d.out" % (i + 1)
-            if type == CodeType.SOLUTION.value
-            else "%d.ans" % (i + 1)
-        )
-        command = generate_isolate_run_command(
-            exec_command, box_id, wall_time, time, input_file, output_file, meta_path
-        )
-        touch_text_file_by_file_name("", output_file, box_id)
-        print("Execute testcase %d" % (i + 1))
-        subprocess.call(command, shell=True)
-        meta = read_meta(box_id)
-        stdout_text = read_output(i + 1, type, box_id)
-        output.append((meta, stdout_text))
-    return output
+    meta_path = "/var/local/lib/isolate/%d/box/meta.mt" % (box_id)
+    touch_text_file("init", CodeType.META, "mt", box_id)
+    input_file = f"{test_case_index+1}.in"
+    output_file = (
+        f"{test_case_index+1}.out"
+        if type == CodeType.SOLUTION.value
+        else f"{test_case_index+1}.ans"
+    )
+    command = generate_isolate_run_command(
+        exec_command, box_id, wall_time, time, input_file, output_file, meta_path
+    )
+    touch_text_file_by_file_name("", output_file, box_id)
+    print(f"Execute testcase {test_case_index+1}")
+    subprocess.call(command, shell=True)
+    meta = read_meta(box_id)
+    return meta
 
 
-def checker(test_case_count, time, wall_time, box_id):
+def checker(test_case_index, time, wall_time, box_id):
     """
     Execute the checker program on the specific ID of the sandbox.
 
@@ -316,16 +312,13 @@ def checker(test_case_count, time, wall_time, box_id):
             A string of results on the meta file after finished check.
 
     """
-    code_output = "%s%s" % (CodeType.CHECKER.value, ".o")
-    meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
-    output = []
-    touch_text_file("init", CodeType.META, Language.NONE, box_id)
-    for i in range(test_case_count):
-        execute_command = "%s %d.in %d.out %d.ans" % (code_output, i + 1, i + 1, i + 1)
-        command = generate_isolate_run_command(
-            execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path
-        )
-        subprocess.call(command, shell=True)
-        meta = read_meta(box_id)
-        output.append(meta)
-    return output
+    code_output = f"{CodeType.CHECKER.value}.o"
+    meta_path = f"/var/local/lib/isolate/{box_id}/box/meta.mt"
+    touch_text_file("init", CodeType.META, "mt", box_id)
+    execute_command = f"{code_output} {test_case_index+1}.in {test_case_index+1}.out {test_case_index+1}.ans"
+    command = generate_isolate_run_command(
+        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path
+    )
+    subprocess.call(command, shell=True)
+    meta = read_meta(box_id)
+    return meta
