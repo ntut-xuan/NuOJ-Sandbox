@@ -18,9 +18,9 @@ class Language(Enum):
 
 
 class ExecuteType(Enum):
-    COMPILE = "C"
-    EXECUTE = "E"
-    JUDGE = "J"
+    COMPILE = "Compile"
+    EXECUTE = "Execute"
+    JUDGE = "Judge"
 
 
 class StatusType(Enum):

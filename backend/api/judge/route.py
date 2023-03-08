@@ -22,13 +22,6 @@ def judge_route():
     status = None
     tracker_id = str(uuid.uuid4())
 
-    if not check_test_case_field_should_have_correct_data(data["test_case"]):
-        return Response(
-            {"status": "Failed", "Message": "Wrong test case payload."},
-            mimetype="application/json",
-            status=400,
-        )
-
     storage_path: str = current_app.config["STORAGE_PATH"]
     open(f"{storage_path}/submission/{tracker_id}.json", "w").write(
         json.dumps(data)

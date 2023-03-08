@@ -36,6 +36,7 @@ class Option:
     threading: bool
     time: float
     wall_time: float
+    webhook_url: str | None = None
 
 @dataclass
 class Task:
@@ -98,19 +99,19 @@ def _initialize_code(task: Task, box_id: int) -> None:
     """
     if task.user_code is not None:
         isolate.touch_text_file(
-            task.user_code, CodeType.SUBMIT, task.user_code.compiler, box_id
+            task.user_code.code, CodeType.SUBMIT, task.user_code.compiler, box_id
         )
         task.flow["init_code"] = _get_timestamp()
 
     if task.solution_code is not None:
         isolate.touch_text_file(
-            task.solution_code, CodeType.SOLUTION, task.solution_code.compiler, box_id
+            task.solution_code.code, CodeType.SOLUTION, task.solution_code.compiler, box_id
         )
         task.flow["init_solution"] = _get_timestamp()
 
     if task.checker_code is not None:
         isolate.touch_text_file(
-            task.checker_code, CodeType.CHECKER, task.checker_code.compiler, box_id
+            task.checker_code.code, CodeType.CHECKER, task.checker_code.compiler, box_id
         )
         task.flow["init_checker"] = _get_timestamp()
 
@@ -128,9 +129,9 @@ def run_task(task: Task, test_case: list[str], box_id: int):
     task.status = StatusType.RUNNING
     task.flow["running"] = _get_timestamp()
 
-    if task.execute_type == ExecuteType.COMPILE:
-        task.result["result"] = compile(CodeType.SUBMIT, task.user_code.compiler, box_id)
-    elif task.execute_type == ExecuteType.EXECUTE:
+    if task.execute_type == ExecuteType.COMPILE.value:
+        task.result = compile(CodeType.SUBMIT, task.user_code.compiler, box_id)
+    elif task.execute_type == ExecuteType.EXECUTE.value:
         result = {
             "compile": compile(CodeType.SUBMIT, task.user_code.compiler, box_id), 
             "report": []
@@ -140,13 +141,13 @@ def run_task(task: Task, test_case: list[str], box_id: int):
             execute_meta_data = execute(CodeType.SUBMIT, task.user_code.compiler, task.options, i, box_id)
             report.append(execute_meta_data)
         result["report"] = report
-        task.result["result"] = result
-    elif task.execute_type == ExecuteType.JUDGE:
+        task.result = result
+    elif task.execute_type == ExecuteType.JUDGE.value:
         result = {
             "compile": {
                 "user_code": compile(CodeType.SUBMIT, task.user_code.compiler, box_id), 
-                "solution_code": compile(CodeType.SOLUTION, task.user_code.compiler, box_id), 
-                "checker_code": compile(CodeType.CHECKER, task.user_code.compiler, box_id)
+                "solution_code": compile(CodeType.SOLUTION, task.solution_code.compiler, box_id), 
+                "checker_code": compile(CodeType.CHECKER, task.checker_code.compiler, box_id)
             }, 
             "judge": {}
         }
@@ -155,7 +156,7 @@ def run_task(task: Task, test_case: list[str], box_id: int):
             execute(CodeType.SOLUTION, task.solution_code.compiler, task.options, i, box_id)
             execute(CodeType.SUBMIT, task.solution_code.compiler, task.options, i, box_id)
         result["judge"] = run_judge(task, box_id)
-        task.result["result"] = result
+        task.result = result
 
 
 def _get_timestamp() -> str:
@@ -184,16 +185,16 @@ def fetch_json_object_from_storage(tracker_id: int) -> dict[str, Any]:
 
 
 def send_webhook_with_webhook_url(task: Task, tracker_id: int):
-    if "webhook_url" in task.options:
+    if task.options.webhook_url is not None:
         resp = requests.post(
-            task.options["webhook_url"],
+            task.options.webhook_url,
             data=json.dumps({"status": "OK", "data": task.result}),
             headers={"content-type": "application/json"},
         )
         if resp.status_code != 200:
             print(
                 "webhook_url "
-                + task.options["webhook_url"]
+                + task.options.webhook_url
                 + " has error that occur result "
                 + tracker_id
                 + " has error."
@@ -203,7 +204,7 @@ def send_webhook_with_webhook_url(task: Task, tracker_id: int):
             if json_data["status"] != "OK":
                 print(
                     "webhook_url "
-                    + task.options["webhook_url"]
+                    + task.options.webhook_url
                     + " has error that occur result "
                     + tracker_id
                     + " send failed."
@@ -220,12 +221,13 @@ def execute_task_with_specific_tracker_id(tracker_id):
     接著會進行初始化、編譯、執行、評測、完成這五個動作，主要設計成盡量不要使用記憶體的空間，避免大量提交導致記憶體耗盡。
     """
     submission_data: dict[str, Any] = fetch_json_object_from_storage(tracker_id)
+    test_case: list[dict[str, Any]] = submission_data["test_case"]
     task = Task(
         checker_code=CodePackage(**submission_data["checker_code"]),
         solution_code=CodePackage(**submission_data["solution_code"]),
         user_code=CodePackage(**submission_data["user_code"]),
-        type=submission_data["type"],
-        test_case=TestCase(**submission_data["test_case"]),
+        execute_type=submission_data["execute_type"],
+        test_case=[TestCase(**test_case[i]) for i in range(len(test_case))],
         options=Option(**submission_data["options"])
     )
     test_case: list[TestCase] = task.test_case
@@ -295,13 +297,13 @@ def initialize_test_case_to_sandbox(test_case_list: list[TestCase], box_id: int)
     index = 1
     for i in range(len(test_case_list)):
         test_case_object: TestCase = test_case_list[i]
-        if test_case_object.use == TestCaseType.STATIC_FILE:
+        if test_case_object.type == TestCaseType.STATIC_FILE:
             index = initialize_test_case_from_storage_and_return_last_index(
-                test_case_object.file, index, box_id
+                test_case_object.value, index, box_id
             )
         else:
             index = initialize_test_case_from_plain_text_and_return_last_index(
-                test_case_object.text, index, box_id
+                test_case_object.value, index, box_id
             )
 
 
@@ -337,7 +339,7 @@ def execute(type: CodeType, language: Language, option: Option, testcase_index: 
 def execute_checker_and_get_result(test_case_index: int, options: Option, box_id: int) -> dict[str, Any]:
     checker_meta = isolate.checker(test_case_index, options.time, options.wall_time, box_id)
     checker_meta_data = meta_data_to_dict(checker_meta)
-    verdict: str = "AC" if checker_meta_data["exitcode"] == "0" else "WA",
+    verdict: str = "AC" if checker_meta_data["exitcode"] == "0" else "WA"
     judge_result = {
         "verdict": verdict,
         "time": checker_meta_data["time"],
@@ -370,5 +372,5 @@ def run_judge(task: Task, box_id) -> dict[str, Any] | None:
         return None
 
 
-def _is_compile_success(meta_data: dict[str, Any]):
-    return "status" in "meta_data"
+def _is_compile_success(meta_data: dict[str, Any]) -> bool:
+    return "status" not in meta_data

@@ -1,7 +1,8 @@
-import pytest
 from tempfile import mkdtemp
 from pathlib import Path
 from shutil import rmtree
+
+import pytest
 
 from app import create_app
 from setting.util import Setting, SettingBuilder
