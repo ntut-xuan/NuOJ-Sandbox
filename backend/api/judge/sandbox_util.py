@@ -23,29 +23,33 @@ from flask import current_app
 
 @dataclass
 class TestCase(JSONWizard):
-    use: TestCaseType
-    text: str = field(default_factory=str)
-    file: str = field(default_factory=str)
-
+    type: TestCaseType
+    value: str
 
 @dataclass
-class Task(JSONWizard):
-    checker_code: str
-    checker_language: Language
+class CodePackage:
+    code: str
+    compiler: Language
+
+@dataclass
+class Option:
+    threading: bool
+    time: float
+    wall_time: float
+
+@dataclass
+class Task:
+    checker_code: CodePackage
+    solution_code: CodePackage
+    user_code: CodePackage
     execute_type: ExecuteType
-    options: dict[str, Any]
-    solution_code: str
-    solution_language: Language
+    options: Option
     test_case: list[TestCase]
-    user_code: str
-    user_language: Language
     flow: dict[str, Any] = field(default_factory=dict[str, Any])
     result: dict[str, Any] = field(default_factory=dict[str, Any])
     status: StatusType = StatusType.PENDING
 
 
-def create_current_time_string() -> str:
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def execute_queueing_task_when_exist_empty_box():
@@ -75,71 +79,92 @@ def fetch_test_case_from_storage(filename: str) -> list[str]:
     return json_object
 
 
-def initialize_testlib_to_sandbox(box_id: int) -> None:
+def initialize_task(task: Task, box_id: int) -> None:
+    task.status = StatusType.INITIAL
+    _initilize_sandbox(box_id)
+    _initialize_code(task, box_id)
+
+
+def _initilize_sandbox(box_id: int) -> None:
+    """
+    這是一個初始化的函數，會將沙盒初始化。
+    """
+    isolate.init_sandbox(box_id)
+
+
+def _initialize_code(task: Task, box_id: int) -> None:
+    """
+    初始化任務的程式碼移置到沙盒的動作。
+    """
+    if task.user_code is not None:
+        isolate.touch_text_file(
+            task.user_code, CodeType.SUBMIT, task.user_code.compiler, box_id
+        )
+        task.flow["init_code"] = _get_timestamp()
+
+    if task.solution_code is not None:
+        isolate.touch_text_file(
+            task.solution_code, CodeType.SOLUTION, task.solution_code.compiler, box_id
+        )
+        task.flow["init_solution"] = _get_timestamp()
+
+    if task.checker_code is not None:
+        isolate.touch_text_file(
+            task.checker_code, CodeType.CHECKER, task.checker_code.compiler, box_id
+        )
+        task.flow["init_checker"] = _get_timestamp()
+
+    _initialize_testlib_to_sandbox(box_id)
+    task.flow["touch_testlib"] = _get_timestamp()
+
+
+def _initialize_testlib_to_sandbox(box_id: int) -> None:
     isolate.touch_text_file_by_file_name(
         open("/etc/nuoj-sandbox/backend/testlib.h", "r").read(), "testlib.h", box_id
     )
 
 
-def initialize_code_for_prepare_sandbox(task: Task, box_id: int):
-    """
-    初始化任務的程式碼移置到沙盒的動作。
-    """
-
-    initilize_sandbox(box_id)
-
-    if task.user_code is not None:
-        isolate.touch_text_file(
-            task.user_code, CodeType.SUBMIT, task.user_language, box_id
-        )
-        task.flow["init_code"] = create_current_time_string()
-
-    if task.solution_code is not None:
-        isolate.touch_text_file(
-            task.solution_code, CodeType.SOLUTION, task.solution_language, box_id
-        )
-        task.flow["init_solution"] = create_current_time_string()
-
-    if task.checker_code is not None:
-        isolate.touch_text_file(
-            task.checker_code, CodeType.CHECKER, task.checker_language, box_id
-        )
-        task.flow["init_checker"] = create_current_time_string()
-
-    initialize_testlib_to_sandbox(box_id)
-    task.flow["touch_testlib"] = create_current_time_string()
-
-
-def initialize_task(task: Task, box_id: int):
-    task.status = StatusType.INITIAL
-    initialize_code_for_prepare_sandbox(task, box_id)
-
-
 def run_task(task: Task, test_case: list[str], box_id: int):
     task.status = StatusType.RUNNING
-    task.flow["running"] = create_current_time_string()
-
-    language_map = {
-        "submit_code": task.user_language,
-        "solution": task.solution_language,
-        "checker": task.checker_language,
-    }
-    time = task.options["time"]
-    wall_time = task.options["wall_time"]
+    task.flow["running"] = _get_timestamp()
 
     if task.execute_type == ExecuteType.COMPILE:
-        task.result["result"] = compile(language_map, CodeType.SUBMIT.value, box_id)
+        task.result["result"] = compile(CodeType.SUBMIT, task.user_code.compiler, box_id)
     elif task.execute_type == ExecuteType.EXECUTE:
-        task.result["result"] = execute(
-            language_map, CodeType.SUBMIT.value, time, wall_time, test_case, box_id
-        )
+        result = {
+            "compile": compile(CodeType.SUBMIT, task.user_code.compiler, box_id), 
+            "report": []
+        }
+        report = []
+        for i in range(len(task.test_case)):
+            execute_meta_data = execute(CodeType.SUBMIT, task.user_code.compiler, task.options, i, box_id)
+            report.append(execute_meta_data)
+        result["report"] = report
+        task.result["result"] = result
     elif task.execute_type == ExecuteType.JUDGE:
-        task.result["result"] = judge(language_map, test_case, time, wall_time, box_id)
+        result = {
+            "compile": {
+                "user_code": compile(CodeType.SUBMIT, task.user_code.compiler, box_id), 
+                "solution_code": compile(CodeType.SOLUTION, task.user_code.compiler, box_id), 
+                "checker_code": compile(CodeType.CHECKER, task.user_code.compiler, box_id)
+            }, 
+            "judge": {}
+        }
+        test_case: list[TestCase] = task.test_case
+        for i in range(len(test_case)):
+            execute(CodeType.SOLUTION, task.solution_code.compiler, task.options, i, box_id)
+            execute(CodeType.SUBMIT, task.solution_code.compiler, task.options, i, box_id)
+        result["judge"] = run_judge(task, box_id)
+        task.result["result"] = result
+
+
+def _get_timestamp() -> str:
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def finish_task(task: Task):
     task.status = StatusType.FINISH
-    task.flow["finished"] = create_current_time_string()
+    task.flow["finished"] = _get_timestamp()
 
 
 def dump_task_result_to_storage(task: Task, tracker_id: int):
@@ -194,8 +219,15 @@ def execute_task_with_specific_tracker_id(tracker_id):
     這是主要處理測資評測的函數，首先會從檔案堆裡找出提交的 json file 與測資的 json file。
     接著會進行初始化、編譯、執行、評測、完成這五個動作，主要設計成盡量不要使用記憶體的空間，避免大量提交導致記憶體耗盡。
     """
-    data = fetch_json_object_from_storage(tracker_id)
-    task = Task.from_dict(data)
+    submission_data: dict[str, Any] = fetch_json_object_from_storage(tracker_id)
+    task = Task(
+        checker_code=CodePackage(**submission_data["checker_code"]),
+        solution_code=CodePackage(**submission_data["solution_code"]),
+        user_code=CodePackage(**submission_data["user_code"]),
+        type=submission_data["type"],
+        test_case=TestCase(**submission_data["test_case"]),
+        options=Option(**submission_data["options"])
+    )
     test_case: list[TestCase] = task.test_case
 
     available_box: set[int] = current_app.config["avaliable_box"]
@@ -220,13 +252,6 @@ def execute_task_with_specific_tracker_id(tracker_id):
     semaphores.release()
     finish(box_id)
     return task.result
-
-
-def initilize_sandbox(box_id: int, option=None):
-    """
-    這是一個初始化的函數，會將沙盒初始化。
-    """
-    isolate.init_sandbox(box_id)
 
 
 def finish(box_id):
@@ -280,110 +305,70 @@ def initialize_test_case_to_sandbox(test_case_list: list[TestCase], box_id: int)
             )
 
 
-def compile(language_map, type, box_id, option=None):
+def compile(type: CodeType, language: Language, box_id: int) -> dict[str, Any] | None:
     """
     這是一個編譯的函數，主要會將程式碼進行編譯，並回傳 meta dict。
     """
     try:
-        meta = isolate.compile(type, language_map[type].value, box_id)
+        meta: str = isolate.compile(type.value, language, box_id)
         meta_data = meta_data_to_dict(meta)
-
-        if "status" in meta_data:
-            meta_data["compile-result"] = "Failed"
-        else:
-            meta_data["compile-result"] = "OK"
-
+        meta_data["compile-status"] = "OK" if _is_compile_success(meta_data) else "Failed"
         return meta_data
     except Exception as e:
         print(traceback.format_exc())
-        return (str(traceback.format_exc()), False)
+        return None
 
 
-def execute(language_map, type, time, wall_time, testcase, box_id, option=None) -> dict:
+def execute(type: CodeType, language: Language, option: Option, testcase_index: int, box_id) -> dict[str, Any] | None:
     """
-    這是一個執行的函數，主要會將測資放入沙盒，使用程式碼進行執行，並回傳結果。
+    這是一個執行的函數，運行指定的程式與測試資料，並回傳運行結果是否正常。
     """
     try:
-        output_data = []
-        result_data = {}
-        meta_data = compile(language_map, type, box_id)
-        if meta_data["compile-result"] == "Failed":
-            result_data["compile"] = meta_data
-            return result_data
-        output = isolate.execute(
-            type, len(testcase), time, wall_time, language_map[type].value, box_id
-        )
-        for data in output:
-            data_dict = {}
-            data_dict["meta"] = meta_data_to_dict(data[0])
-            data_dict["output"] = data[1]
-            output_data.append(data_dict)
-        result_data["compile"] = meta_data
-        result_data["execute"] = output_data
-        return result_data
-    except Exception as e:
+        time = option.time
+        wall_time = option.wall_time
+        meta = isolate.execute(type.value, testcase_index, time, wall_time, language, box_id)
+        meta_data = meta_data_to_dict(meta)
+        return meta_data
+    except Exception:
         print(traceback.format_exc())
-        return (str(traceback.format_exc()), False)
+        return None
 
 
-def judge(language_map, testcase, time, wall_time, box_id, option=None):
+def execute_checker_and_get_result(test_case_index: int, options: Option, box_id: int) -> dict[str, Any]:
+    checker_meta = isolate.checker(test_case_index, options.time, options.wall_time, box_id)
+    checker_meta_data = meta_data_to_dict(checker_meta)
+    verdict: str = "AC" if checker_meta_data["exitcode"] == "0" else "WA",
+    judge_result = {
+        "verdict": verdict,
+        "time": checker_meta_data["time"],
+        "memory": checker_meta_data["cg-mem"]
+    }
+    return judge_result
+    
+
+def run_judge(task: Task, box_id) -> dict[str, Any] | None:
     """
     這是一個評測的函數，主要會編譯、執行並使用 checker 進行評測，回傳結果。
     """
     try:
-        result = {}
-        # 編譯 checker
-        result["checker-compile"] = compile(
-            language_map, CodeType.CHECKER.value, box_id
-        )
-        if result["checker-compile"]["compile-result"] == "Failed":
-            return result
-        # 運行 solution
-        result["solution_execute"] = execute(
-            language_map, CodeType.SOLUTION.value, time, wall_time, testcase, box_id
-        )
-        if result["solution_execute"]["compile"]["compile-result"] == "Failed":
-            return result
-        # 運行 submit
-        result["submit_execute"] = execute(
-            language_map, CodeType.SUBMIT.value, time, wall_time, testcase, box_id
-        )
-        if result["submit_execute"]["compile"]["compile-result"] == "Failed":
-            return result
-        # 運行 judge
-        judge_meta_list = isolate.checker(len(testcase), time, wall_time, box_id)
-        judge_meta_data = []
-        for data in judge_meta_list:
-            judge_meta_data.append(meta_data_to_dict(data))
-        result["judge_result"] = judge_meta_data
+        judge_report = []
+        is_wa = False
+        test_case: list[TestCase] = task.test_case
+        
+        for i in range(len(test_case)):
+            judge_result: dict[str, Any] = execute_checker_and_get_result(i, task.options, box_id)
+            is_wa |= (judge_result["verdict"] != "AC")
+            judge_report.append(judge_result)
 
-        report = []
-        for i in range(len(judge_meta_data)):
-            report_dict = {
-                "verdict": "",
-                "time": result["submit_execute"]["execute"][i]["meta"]["time"],
-                "memory": result["submit_execute"]["execute"][i]["meta"]["cg-mem"],
-            }
-            report_dict["verdict"] = (
-                "AC" if judge_meta_data[i]["exitcode"] == "0" else "WA"
-            )
-            report.append(report_dict)
-
-        result["report"] = report
-
-        verdict = "AC"
-        for report_data in report:
-            if report_data["verdict"] != "AC":
-                verdict = report_data["verdict"]
-                break
-
-        result["verdict"] = verdict
-
-        del result["judge_result"]
-        del result["solution_execute"]["execute"]
-        del result["submit_execute"]["execute"]
-
+        result: dict[str, Any] = {
+            "report": judge_report,
+            "verdict": "WA" if is_wa else "AC"
+        }
         return result
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
-        return (str(traceback.format_exc()), False)
+        return None
+
+
+def _is_compile_success(meta_data: dict[str, Any]):
+    return "status" in "meta_data"

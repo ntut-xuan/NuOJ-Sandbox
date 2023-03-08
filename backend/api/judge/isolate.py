@@ -304,7 +304,7 @@ def execute(type, test_case_count, time, wall_time, language, box_id=0) -> str:
     return output
 
 
-def checker(test_case_count, time, wall_time, box_id):
+def checker(test_case_index, time, wall_time, box_id):
     """
     Execute the checker program on the specific ID of the sandbox.
 
@@ -316,16 +316,15 @@ def checker(test_case_count, time, wall_time, box_id):
             A string of results on the meta file after finished check.
 
     """
-    code_output = "%s%s" % (CodeType.CHECKER.value, ".o")
-    meta_path = "/var/local/lib/isolate/%d/box/meta" % (box_id)
+    code_output = f"{CodeType.CHECKER.value}.o"
+    meta_path = f"/var/local/lib/isolate/{box_id}/box/meta"
     output = []
     touch_text_file("init", CodeType.META, Language.NONE, box_id)
-    for i in range(test_case_count):
-        execute_command = "%s %d.in %d.out %d.ans" % (code_output, i + 1, i + 1, i + 1)
-        command = generate_isolate_run_command(
-            execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path
-        )
-        subprocess.call(command, shell=True)
-        meta = read_meta(box_id)
-        output.append(meta)
+    execute_command = f"{code_output} {test_case_index}.in {test_case_index}.out {test_case_index}.ans"
+    command = generate_isolate_run_command(
+        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path
+    )
+    subprocess.call(command, shell=True)
+    meta = read_meta(box_id)
+    output.append(meta)
     return output
