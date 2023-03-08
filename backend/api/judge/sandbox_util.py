@@ -4,6 +4,7 @@ import threading
 import traceback
 from dataclasses import dataclass, field
 from typing import Any
+from threading import Semaphore
 
 import api.judge.isolate as isolate
 from api.judge.sandbox_enum import (
@@ -18,14 +19,6 @@ import requests
 from dataclass_wizard import JSONWizard
 from datetime import datetime
 from flask import current_app
-
-
-setting = json.loads(open("./setting.json", "r").read())
-n = int(setting["sandbox_number"])
-sem = threading.Semaphore(n)
-result_map = {}
-available_box = set([(i + 1) for i in range(n)])
-submission_list = []
 
 
 @dataclass
@@ -61,6 +54,8 @@ def execute_queueing_task_when_exist_empty_box():
     如果有的話，就會把提交丟到空的 box，沒有的話就會跳過，每一秒確認一次
     """
     while True:
+        submission_list: list[str] = current_app.config["submission"]
+        available_box: set[int] = current_app.config["avaliable_box"]
         if len(submission_list) > 0 and len(available_box) > 0:
             tracker_id = submission_list.pop(0)
             print(tracker_id)
@@ -203,8 +198,11 @@ def execute_task_with_specific_tracker_id(tracker_id):
     task = Task.from_dict(data)
     test_case: list[TestCase] = task.test_case
 
+    available_box: set[int] = current_app.config["avaliable_box"]
+    semaphores: Semaphore = current_app.config["semaphores"]
+
     # Bind thread with acquire
-    sem.acquire()
+    semaphores.acquire()
     box_id = available_box.pop()
 
     # Execute the task
@@ -219,7 +217,7 @@ def execute_task_with_specific_tracker_id(tracker_id):
 
     # Free thread with release function.
     available_box.add(box_id)
-    sem.release()
+    semaphores.release()
     finish(box_id)
     return task.result
 
