@@ -5,7 +5,6 @@ from flask import Blueprint, Response, current_app, request
 
 from api.judge.sandbox_util import (
     execute_task_with_specific_tracker_id,
-    submission_list,
 )
 from api.judge.route_util import check_test_case_field_should_have_correct_data
 
@@ -37,6 +36,7 @@ def judge_route():
     del data
 
     if option["threading"]:
+        submission_list: list[str] = current_app.config["submission"]
         submission_list.append(tracker_id)
     else:
         result = execute_task_with_specific_tracker_id(tracker_id)
