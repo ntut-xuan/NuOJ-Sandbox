@@ -8,7 +8,7 @@ from typing import Any
 from threading import Semaphore
 
 from api.judge.route import judge_api_bp
-from api.judge.sandbox_util import execute_queueing_task_when_exist_empty_box
+from api.judge.util import execute_queueing_task_when_exist_empty_box
 from api.result.route import result_api_bp
 from api.swagger.route import swagger_api_bp
 from api.system.route import system_api_bp

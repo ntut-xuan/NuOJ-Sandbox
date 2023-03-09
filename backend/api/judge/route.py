@@ -3,10 +3,7 @@ import uuid
 
 from flask import Blueprint, Response, current_app, request
 
-from api.judge.sandbox_util import (
-    execute_task_with_specific_tracker_id,
-)
-from api.judge.route_util import check_test_case_field_should_have_correct_data
+from api.judge.util import execute_task_with_specific_tracker_id
 
 judge_api_bp = Blueprint("judge", __name__, url_prefix="/api/judge")
 

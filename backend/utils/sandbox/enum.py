@@ -9,14 +9,6 @@ class CodeType(Enum):
     META = "meta"
 
 
-class Language(Enum):
-    CPP = "cpp"
-    PYTHON = "py"
-    JAVA = "java"
-    GO = "go"
-    NONE = ""
-
-
 class ExecuteType(Enum):
     COMPILE = "Compile"
     EXECUTE = "Execute"
@@ -34,11 +26,9 @@ class TestCaseType(Enum):
     STATIC_FILE = "static-file"
     PLAIN_TEXT = "plain-text"
 
-
-def str2Language(str):
-    if str == "cpp":
-        return Language.CPP
-    elif str == "py":
-        return Language.PYTHON
-    elif str == "java":
-        return Language.JAVA
+class Language(Enum):
+    CPP = "cpp"
+    PYTHON = "py"
+    JAVA = "java"
+    GO = "go"
+    NONE = ""
