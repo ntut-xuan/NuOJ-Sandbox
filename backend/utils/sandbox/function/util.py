@@ -5,7 +5,7 @@ from utils.sandbox.enum import CodeType
 from utils.sandbox.util import Task, TestCase, Option, meta_data_to_dict
 from utils.isolate.util import compile, execute, checker
 
-def compile(type: CodeType, compiler: str, box_id: int) -> dict[str, Any] | None:
+def compile_code(type: CodeType, compiler: str, box_id: int) -> dict[str, Any] | None:
     """
     這是一個編譯的函數，主要會將程式碼進行編譯，並回傳 meta dict。
     """
@@ -19,7 +19,7 @@ def compile(type: CodeType, compiler: str, box_id: int) -> dict[str, Any] | None
         return None
 
 
-def execute(type: CodeType, compiler: str, option: Option, testcase_index: int, box_id) -> dict[str, Any] | None:
+def execute_code(type: CodeType, compiler: str, option: Option, testcase_index: int, box_id) -> dict[str, Any] | None:
     """
     這是一個執行的函數，運行指定的程式與測試資料，並回傳運行結果是否正常。
     """
@@ -34,7 +34,7 @@ def execute(type: CodeType, compiler: str, option: Option, testcase_index: int, 
         return None
     
 
-def judge(task: Task, box_id) -> dict[str, Any] | None:
+def judge_code(task: Task, box_id) -> dict[str, Any] | None:
     """
     這是一個評測的函數，主要會編譯、執行並使用 checker 進行評測，回傳結果。
     """
