@@ -25,3 +25,10 @@ class StatusType(Enum):
 class TestCaseType(Enum):
     STATIC_FILE = "static-file"
     PLAIN_TEXT = "plain-text"
+
+class Language(Enum):
+    CPP = "cpp"
+    PYTHON = "py"
+    JAVA = "java"
+    GO = "go"
+    NONE = ""
