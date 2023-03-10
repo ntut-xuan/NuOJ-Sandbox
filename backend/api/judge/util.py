@@ -80,7 +80,6 @@ def _dump_task_result_to_storage(task: Task, tracker_id: int):
         "flow": task.flow,
         "result": task.result
     }
-    print(json.dumps(result))
     write_file(tracker_id + ".result", json.dumps(result), TunnelCode.RESULT)
 
 

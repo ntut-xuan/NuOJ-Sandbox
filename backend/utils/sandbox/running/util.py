@@ -49,5 +49,6 @@ def _fetch_all_of_input_and_user_output(test_case: list[TestCase], box_id: int) 
         execute_results.append({
             "input": test_case[i].value,
             "output": read_output(i, CodeType.SUBMIT.value, box_id),
+            "answer": read_output(i, CodeType.SOLUTION.value, box_id),
         })
     return execute_results
