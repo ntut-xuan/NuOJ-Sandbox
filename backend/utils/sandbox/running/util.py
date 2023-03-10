@@ -35,3 +35,5 @@ def run_task(task: Task, test_case: list[str], box_id: int):
             execute_code(CodeType.SUBMIT, task.solution_code.compiler, task.options, i, box_id)
         result["judge"] = judge_code(task, box_id)
         task.result = result
+    else:
+        task.result = {"error": "Invalid execute type."}

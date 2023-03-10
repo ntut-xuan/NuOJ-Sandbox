@@ -3,8 +3,8 @@ import json
 from flask import Blueprint, Response, request
 from storage.util import (
     TunnelCode,
-    file_storage_tunnel_exist,
-    file_storage_tunnel_read,
+    is_file_exists,
+    read_file,
 )
 
 test_case_api_bp = Blueprint("test_case", __name__, url_prefix="/api/test_case")
@@ -37,7 +37,7 @@ def tc_fetch(problem_pid):
     """
     用於取得測資的部分，以及取得測資的數量
     """
-    if file_storage_tunnel_exist(problem_pid + ".json", TunnelCode.TESTCASE) == False:
+    if is_file_exists(problem_pid + ".json", TunnelCode.TESTCASE) == False:
         return Response(
             json.dumps(
                 {
@@ -48,7 +48,7 @@ def tc_fetch(problem_pid):
             mimetype="application/json",
         )
 
-    testcase_raw = file_storage_tunnel_read(problem_pid + ".json", TunnelCode.TESTCASE)
+    testcase_raw = read_file(problem_pid + ".json", TunnelCode.TESTCASE)
     testcase_json_data = None
 
     try:

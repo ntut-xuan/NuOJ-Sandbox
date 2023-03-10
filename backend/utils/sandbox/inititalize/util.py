@@ -1,5 +1,10 @@
 import json
 
+<<<<<<< Updated upstream
+=======
+from flask import current_app
+
+>>>>>>> Stashed changes
 from utils.sandbox.util import Task, TestCase, get_timestamp
 from utils.sandbox.enum import CodeType, StatusType, TestCaseType
 from utils.isolate.util import init_sandbox, touch_text_file, touch_text_file_by_file_name
@@ -15,7 +20,7 @@ def initialize_test_case_to_sandbox(test_case_list: list[TestCase], box_id: int)
     index = 1
     for i in range(len(test_case_list)):
         test_case_object: TestCase = test_case_list[i]
-        if test_case_object.type == TestCaseType.STATIC_FILE:
+        if test_case_object.type == TestCaseType.STATIC_FILE.value:
             index = _initialize_test_case_from_storage_and_return_last_index(test_case_object.value, index, box_id)
         else:
             index = _initialize_test_case_from_plain_text_and_return_last_index(test_case_object.value, index, box_id)
@@ -73,6 +78,7 @@ def _initialize_test_case_from_plain_text_and_return_last_index(text: str, start
 
 def _fetch_test_case_from_storage(filename: str) -> list[str]:
     json_object: list[str]
-    with open(f"/etc/nuoj-sandbox/storage/testcase/{filename}.json", "r") as f:
+    storage_path: str = current_app.config["STORAGE_PATH"]
+    with open(f"{storage_path}/testcase/{filename}.json", "r") as f:
         json_object = json.loads(f.read())
     return json_object
