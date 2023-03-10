@@ -164,8 +164,6 @@ def touch_text_file(text, type: CodeType, compiler: str, box_id=0) -> tuple:
     print("create file at", path)
     with open(path, "w") as code_file:
         code_file.write(text)
-    if not os.path.exists(path):
-        return (path, False)
     return (path, True)
 
 
@@ -187,8 +185,6 @@ def touch_text_file_by_file_name(text, filename, box_id=0) -> tuple:
     print("create file at", path)
     with open(path, "w") as code_file:
         code_file.write(text)
-    if not os.path.exists(path):
-        return (path, False)
     return (path, True)
 
 
