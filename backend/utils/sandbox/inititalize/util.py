@@ -1,10 +1,7 @@
 import json
 
-<<<<<<< Updated upstream
-=======
 from flask import current_app
 
->>>>>>> Stashed changes
 from utils.sandbox.util import Task, TestCase, get_timestamp
 from utils.sandbox.enum import CodeType, StatusType, TestCaseType
 from utils.isolate.util import init_sandbox, touch_text_file, touch_text_file_by_file_name
