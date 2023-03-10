@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import pytest
@@ -8,6 +9,10 @@ from utils.sandbox.enum import StatusType, TestCaseType
 from utils.sandbox.util import Task, TestCase
 from utils.isolate.util import init_sandbox
 from utils.sandbox.inititalize.util import initialize_task, initialize_test_case_to_sandbox
+ 
+# Since "TestCase", "TestCaseType" is start with "Test", so it will be confirm a Test Class by Pytest and raise the warning.
+# We need to filter the warning by warnings.filterwarnings.
+warnings.filterwarnings("ignore", message="cannot collect test class .+")
  
 class TestInitializeTask:
     def test_with_test_task_should_modify_the_state_of_task(self, cleanup_test_sandbox: None, test_task: Task):
