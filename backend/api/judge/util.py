@@ -12,7 +12,8 @@ from utils.sandbox.util import CodePackage, Task, TestCase, Option
 from utils.sandbox.finish.util import finish_task
 from utils.sandbox.inititalize.util import initialize_task, initialize_test_case_to_sandbox
 from utils.sandbox.running.util import run_task
-
+from storage.util import TunnelCode, write_file
+    
 
 def execute_queueing_task_when_exist_empty_box():
     """
@@ -74,11 +75,13 @@ def execute_task_with_specific_tracker_id(tracker_id):
 
 
 def _dump_task_result_to_storage(task: Task, tracker_id: int):
-    storage_path: str = current_app.config["STORAGE_PATH"]
-    path = f"{storage_path}/result/{tracker_id}.result"
-
-    with open(path, "w") as f:
-        f.write(json.dumps(task.result, indent=4))
+    result: dict[str, Any] = {
+        "status": task.status.value,
+        "flow": task.flow,
+        "result": task.result
+    }
+    print(json.dumps(result))
+    write_file(tracker_id + ".result", json.dumps(result), TunnelCode.RESULT)
 
 
 def _fetch_json_object_from_storage(tracker_id: int) -> dict[str, Any]:

@@ -6,12 +6,18 @@ from utils.sandbox.running.util import run_task
 from utils.sandbox.util import Task
 
 def test_with_test_task_should_change_the_task_status(cleanup_test_sandbox: None, test_task: Task):
+    initialize_task(test_task, 0)
+    initialize_test_case_to_sandbox(test_task.test_case, 0)
+    
     run_task(test_task, test_task.test_case, 0)
     
     assert test_task.status == StatusType.RUNNING
 
 @freeze_time("2002-06-25 00:00:00")
 def test_with_test_task_should_have_running_timestamp(cleanup_test_sandbox: None, test_task: Task):
+    initialize_task(test_task, 0)
+    initialize_test_case_to_sandbox(test_task.test_case, 0)
+    
     run_task(test_task, test_task.test_case, 0)
     
     assert test_task.flow["running"] == "2002-06-25 00:00:00"

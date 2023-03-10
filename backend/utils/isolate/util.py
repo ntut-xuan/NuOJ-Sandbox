@@ -78,6 +78,7 @@ def generate_isolate_run_command(
     time: int | None = None,
     stdin: str | None = None,
     stdout: str | None = None,
+    stderr: str | None = None,
     meta: str | None = None,
     dir: tuple[str, str] | None = None
 ) -> str:
@@ -89,6 +90,7 @@ def generate_isolate_run_command(
         full_env=True,
         stdin=stdin,
         stdout=stdout,
+        stderr=stderr,
         max_processes=True,
         meta=meta,
         open_files=2048,
@@ -218,11 +220,27 @@ def read_output(output_index, type, box_id=0) -> str:
 
     """
     output_file = (
-        "%d.out" % (output_index)
-        if type == CodeType.SOLUTION.value
-        else "%d.ans" % (output_index)
+        "%d.out" % (output_index+1)
+        if type == CodeType.SUBMIT.value
+        else "%d.ans" % (output_index+1)
     )
     output_path = ("/var/local/lib/isolate/%d/box/" + output_file) % (box_id)
+    with open(output_path, "r") as code_file:
+        return code_file.read()
+    
+def read_checker_log(output_index, box_id=0) -> str:
+    """
+    Return the output file of text, the result after the Isolate run.
+
+        Parameters:
+            output_index: The index of the output file you want to read the text.
+            box_id: The ID of the sandbox you want to read the text of meta file.
+
+        Return:
+            A string, the text of output file on the specific ID of the sandbox.
+
+    """
+    output_path = f"/var/local/lib/isolate/{box_id}/box/{output_index+1}.checker.msg"
     with open(output_path, "r") as code_file:
         return code_file.read()
 
@@ -288,7 +306,7 @@ def execute(type, test_case_index, time, wall_time, language, box_id=0) -> str:
         else f"{test_case_index+1}.ans"
     )
     command = generate_isolate_run_command(
-        exec_command, box_id, wall_time, time, input_file, output_file, meta_path
+        exec_command, box_id, wall_time, time, input_file, output_file, meta=meta_path
     )
     touch_text_file_by_file_name("", output_file, box_id)
     print(f"Execute testcase {test_case_index+1}")
@@ -311,10 +329,12 @@ def checker(test_case_index, time, wall_time, box_id):
     """
     code_output = f"{CodeType.CHECKER.value}.o"
     meta_path = f"/var/local/lib/isolate/{box_id}/box/meta.mt"
+    checker_msg_file = f"{test_case_index+1}.checker.msg"
     touch_text_file("init", CodeType.META, "mt", box_id)
+    touch_text_file_by_file_name("init", checker_msg_file, box_id)
     execute_command = f"{code_output} {test_case_index+1}.in {test_case_index+1}.out {test_case_index+1}.ans"
     command = generate_isolate_run_command(
-        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path
+        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path, stderr=checker_msg_file
     )
     subprocess.call(command, shell=True)
     meta = read_meta(box_id)

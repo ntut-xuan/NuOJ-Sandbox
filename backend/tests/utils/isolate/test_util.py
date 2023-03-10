@@ -117,7 +117,7 @@ def test_read_output_should_read_the_correct_meta_data(box_environment: None):
     with open("/var/local/lib/isolate/0/box/1.ans", "w") as file:
         file.write("random_answer")
         
-    output: str = read_output(1, CodeType.SOLUTION, 0)
+    output: str = read_output(0, CodeType.SOLUTION, 0)
     
     assert output == "random_answer"
 
