@@ -23,6 +23,11 @@ def user_code() -> str:
     with open("./tests/test_code/code.cpp") as file:
         return file.read()
 
+@pytest.fixture
+def testlib() -> str:
+    with open("testlib.h") as file:
+        return file.read()
+
 @pytest.fixture()
 def app():
     storage_path: str = mkdtemp()

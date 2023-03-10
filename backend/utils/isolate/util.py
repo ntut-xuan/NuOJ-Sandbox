@@ -79,6 +79,7 @@ def generate_isolate_run_command(
     stdin: str | None = None,
     stdout: str | None = None,
     meta: str | None = None,
+    dir: tuple[str, str] | None = None
 ) -> str:
     # --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --stdin='%d.in' --stdout='%s' --meta='%s'
     options = generate_options_with_parameter(
@@ -92,7 +93,7 @@ def generate_isolate_run_command(
         meta=meta,
         open_files=2048,
         cg=True,
-        dir=("/root/.cache/go-build", "tmp"),
+        dir=dir,
     )
     return f"isolate {options} --run -- {execute_command}"
 
@@ -283,7 +284,7 @@ def execute(type, test_case_index, time, wall_time, language, box_id=0) -> str:
     input_file = f"{test_case_index+1}.in"
     output_file = (
         f"{test_case_index+1}.out"
-        if type == CodeType.SOLUTION.value
+        if type == CodeType.SUBMIT.value
         else f"{test_case_index+1}.ans"
     )
     command = generate_isolate_run_command(
