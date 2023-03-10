@@ -32,8 +32,6 @@ def judge_route():
         result = execute_task_with_specific_tracker_id(tracker_id)
 
     response = {"status": "OK", "type": execution_type, "tracker_id": tracker_id}
-    if status == False:
-        response["status"] = "Failed"
 
     if not option["threading"]:
         response["result"] = result

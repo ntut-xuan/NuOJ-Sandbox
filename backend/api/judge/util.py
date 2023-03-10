@@ -25,7 +25,7 @@ def execute_queueing_task_when_exist_empty_box():
         if len(submission_list) > 0 and len(available_box) > 0:
             tracker_id = submission_list.pop(0)
             print(tracker_id)
-            thread = threading.Thread(
+            thread = FlaskThread(
                 target=execute_task_with_specific_tracker_id,
                 kwargs={"tracker_id": tracker_id},
             )
@@ -78,6 +78,8 @@ def _dump_task_result_to_storage(task: Task, tracker_id: int):
     storage_path: str = current_app.config["STORAGE_PATH"]
     path = f"{storage_path}/result/{tracker_id}.result"
 
+    print(path)
+
     with open(path, "w") as f:
         f.write(json.dumps(task.result, indent=4))
 
@@ -105,3 +107,12 @@ def _send_webhook_with_webhook_url(task: Task, tracker_id: int):
                 print(f"webhook_url {task.options.webhook_url} has error that occur result {tracker_id} send failed.")
             else:
                 print(f"webhook_url {task.options.webhook_url} send successfully.")
+
+class FlaskThread(threading.Thread):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.app: Flask = current_app._get_current_object()  # type: ignore[attr-defined]
+
+    def run(self) -> None:
+        with self.app.app_context():
+            super().run()
