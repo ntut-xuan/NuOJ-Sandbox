@@ -3,52 +3,51 @@ from storage.tunnel_code import TunnelCode
 
 from flask import current_app
 
-def file_storage_tunnel_exist(filename: str, tunnel: TunnelCode) -> bool:
-    storage_path: str = current_app.config["STORAGE_PATH"]
-    path = f"{storage_path}/{tunnel.value}/{filename}"
-    return os.path.exists(path)
+def is_file_exists(filename: str, tunnel: TunnelCode) -> bool:
+    file_path = _make_file_path(tunnel, filename)
+    return os.path.exists(file_path)
 
 
-def file_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> str:
-    storage_path: str = current_app.config["STORAGE_PATH"]
-    path = f"{storage_path}/{tunnel.value}/{filename}"
-    if file_storage_tunnel_exist(filename, tunnel):
-        with open(path, "r") as file:
+def read_file(filename: str, tunnel: TunnelCode) -> str:
+    file_path = _make_file_path(tunnel, filename)
+    if is_file_exists(filename, tunnel):
+        with open(file_path, "r") as file:
             return file.read()
     else:
         return ""
 
 
-def byte_storage_tunnel_read(filename: str, tunnel: TunnelCode) -> bytes:
-    storage_path: str = current_app.config["STORAGE_PATH"]
-    path = f"{storage_path}/{tunnel.value}/{filename}"
-    if file_storage_tunnel_exist(filename, tunnel):
-        with open(path, "rb") as file:
+def read_file_bytes(filename: str, tunnel: TunnelCode) -> bytes:
+    file_path = _make_file_path(tunnel, filename)
+    if is_file_exists(filename, tunnel):
+        with open(file_path, "rb") as file:
             return file.read()
     else:
-        return 0
+        return b""
 
 
-def file_storage_tunnel_write(filename: str, data: str, tunnel: TunnelCode) -> None:
-    storage_path: str = current_app.config["STORAGE_PATH"]
-    path = f"{storage_path}/{tunnel.value}/{filename}"
-    with open(path, "w") as file:
+def write_file(filename: str, data: str, tunnel: TunnelCode) -> None:
+    file_path = _make_file_path(tunnel, filename)
+    with open(file_path, "w") as file:
         file.write(data)
         file.close()
 
 
-def byte_storage_tunnel_write(filename: str, data, tunnel: TunnelCode) -> None:
-    storage_path: str = current_app.config["STORAGE_PATH"]
-    path = f"{storage_path}/{tunnel.value}/{filename}"
-    with open(path, "wb") as file:
+def write_file_bytes(filename: str, data: bytes, tunnel: TunnelCode) -> None:
+    file_path = _make_file_path(tunnel, filename)
+    with open(file_path, "wb") as file:
         file.write(data)
         file.close()
 
 
-def file_storage_tunnel_del(filename: str, tunnel: TunnelCode) -> str:
-    storage_path: str = current_app.config["STORAGE_PATH"]
-    path = f"{storage_path}/{tunnel.value}/{filename}"
-    if file_storage_tunnel_exist(filename, tunnel):
-        os.remove(path)
-    else:
-        return ""
+def delete_file(filename: str, tunnel: TunnelCode) -> None:
+    file_path = _make_file_path(tunnel, filename)
+    if is_file_exists(filename, tunnel):
+        os.remove(file_path)
+
+
+def _make_file_path(tunnel: TunnelCode, filename: str) -> str:
+    storage_path = current_app.config.get("STORAGE_PATH")
+    assert storage_path is not None
+    file_path = "%s/%s/%s" % (storage_path, tunnel.value, filename)
+    return file_path
