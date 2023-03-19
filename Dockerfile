@@ -14,6 +14,7 @@ RUN mkdir /etc/nuoj-sandbox/storage
 RUN mkdir /etc/nuoj-sandbox/storage/testcase
 RUN mkdir /etc/nuoj-sandbox/storage/submission
 RUN mkdir /etc/nuoj-sandbox/storage/result
+# check support isolate
 RUN mkdir /etc/isolate
 # make isolate
 RUN git clone https://github.com/ioi/isolate.git /etc/isolate
@@ -23,6 +24,7 @@ RUN make install
 # cd to nuoj-sandbox
 WORKDIR /etc/nuoj-sandbox
 COPY . /etc/nuoj-sandbox/
+RUN sh backend/env_doctor.sh
 # install pyhton package from pip
 RUN pip3 install -r requirements.txt
 # expose port with 4439
