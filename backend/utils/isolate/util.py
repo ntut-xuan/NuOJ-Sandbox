@@ -191,7 +191,7 @@ def touch_text_file_by_file_name(text, filename, box_id=0) -> tuple:
     return (path, True)
 
 
-def read_meta(box_id=0) -> str:
+def read_meta(box_id, name="meta") -> str:
     """
     Return the meta file of text, the result after the Isolate run.
 
@@ -202,7 +202,7 @@ def read_meta(box_id=0) -> str:
             A string, the text of meta file on the specific ID of the sandbox.
 
     """
-    meta_path = "/var/local/lib/isolate/%d/box/meta.mt" % (box_id)
+    meta_path = f"/var/local/lib/isolate/{box_id}/box/{name}.mt"
     with open(meta_path, "r") as code_file:
         return code_file.read()
 
@@ -270,14 +270,15 @@ def compile(type, language, box_id=0) -> str:
             A string of results on the meta file after finished compiled.
 
     """
-    meta_path = "/var/local/lib/isolate/%d/box/meta.mt" % (box_id)
+    meta_name = f"{type}.compile"
+    meta_path = f"/var/local/lib/isolate/{box_id}/box/{meta_name}.mt"
     compile_command = compile_command_generator(type, language)
     command = generate_isolate_run_command(
         compile_command, box_id, time=10, meta=meta_path
     )
-    touch_text_file("init", CodeType.META, "mt", box_id)
+    touch_text_file_by_file_name("init", f"{meta_name}.mt", box_id)
     subprocess.call(command, shell=True)
-    return read_meta(box_id)
+    return read_meta(box_id, name=meta_name)
 
 
 def execute(type, test_case_index, time, wall_time, language, box_id=0) -> str:
@@ -297,21 +298,20 @@ def execute(type, test_case_index, time, wall_time, language, box_id=0) -> str:
 
     """
     exec_command = execute_command(type, language)
-    meta_path = "/var/local/lib/isolate/%d/box/meta.mt" % (box_id)
-    touch_text_file("init", CodeType.META, "mt", box_id)
+    extension = "out" if CodeType.SUBMIT.value == type else "ans"
+    meta_name = f"{test_case_index+1}.{extension}"
+    meta_path = f"/var/local/lib/isolate/{box_id}/box/{meta_name}.mt"
+    touch_text_file_by_file_name("init", f"{meta_name}.mt", box_id)
     input_file = f"{test_case_index+1}.in"
-    output_file = (
-        f"{test_case_index+1}.out"
-        if type == CodeType.SUBMIT.value
-        else f"{test_case_index+1}.ans"
-    )
+    output_file = f"{test_case_index+1}.{extension}"
     command = generate_isolate_run_command(
         exec_command, box_id, wall_time, time, input_file, output_file, meta=meta_path
     )
-    touch_text_file_by_file_name("", output_file, box_id)
+    touch_text_file_by_file_name("init", output_file, box_id)
+    
     print(f"Execute testcase {test_case_index+1}")
     subprocess.call(command, shell=True)
-    meta = read_meta(box_id)
+    meta = read_meta(box_id, name=meta_name)
     return meta
 
 
@@ -328,14 +328,20 @@ def checker(test_case_index, time, wall_time, box_id):
 
     """
     code_output = f"{CodeType.CHECKER.value}.o"
-    meta_path = f"/var/local/lib/isolate/{box_id}/box/meta.mt"
-    checker_msg_file = f"{test_case_index+1}.checker.msg"
-    touch_text_file("init", CodeType.META, "mt", box_id)
-    touch_text_file_by_file_name("init", checker_msg_file, box_id)
-    execute_command = f"{code_output} {test_case_index+1}.in {test_case_index+1}.out {test_case_index+1}.ans"
+    meta_name = f"{test_case_index+1}.checker"
+    meta_path = f"/var/local/lib/isolate/{box_id}/box/{meta_name}.mt"
+    checker_msg_file_name = f"{meta_name}.msg"
+    touch_text_file_by_file_name("init", f"{meta_name}.mt", box_id)
+    touch_text_file_by_file_name("init", checker_msg_file_name, box_id)
+    
+    input_name = f"{test_case_index+1}.in"
+    output_name = f"{test_case_index+1}.out"
+    answer_name = f"{test_case_index+1}.ans"
+    execute_command = f"{code_output} {input_name} {output_name} {answer_name}"
     command = generate_isolate_run_command(
-        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path, stderr=checker_msg_file
+        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path, stderr=checker_msg_file_name
     )
+    
     subprocess.call(command, shell=True)
-    meta = read_meta(box_id)
+    meta = read_meta(box_id, name=meta_name)
     return meta
