@@ -1,3 +1,4 @@
+import pytest
 from freezegun import freeze_time
 
 from utils.sandbox.enum import ExecuteType, StatusType
@@ -61,3 +62,117 @@ def test_with_invalid_execute_type_should_return_error_result(cleanup_test_sandb
     run_task(test_task, test_task.test_case, 0)
     
     assert test_task.result["error"] == "Invalid execute type."
+
+class TestStatus:
+    def test_with_valid_codes_should_return_status_ok(self, cleanup_test_sandbox: None, test_task: Task):
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "status" in test_task.result
+        assert test_task.result["status"] == "OK"
+
+    def test_with_valid_codes_should_return_message_ok(self, cleanup_test_sandbox: None, test_task: Task):
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "message" in test_task.result
+        assert test_task.result["message"] == "OK."
+
+    def test_with_valid_codes_should_return_correct_compile_detail_info(self, cleanup_test_sandbox: None, test_task: Task):
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "compile_detail" in test_task.result
+        assert "solution" in test_task.result["compile_detail"]
+        assert "submit" in test_task.result["compile_detail"]
+        assert "checker" in test_task.result["compile_detail"]
+        assert test_task.result["compile_detail"]["solution"]["exitcode"] == "0"
+        assert test_task.result["compile_detail"]["submit"]["exitcode"] == "0"
+        assert test_task.result["compile_detail"]["checker"]["exitcode"] == "0"
+        
+    def test_with_invalid_solution_should_return_sce_status(self, cleanup_test_sandbox: None, test_task: Task, wrong_syntax_code: str):
+        test_task.solution_code.code = wrong_syntax_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "status" in test_task.result
+        assert "message" in test_task.result
+        assert test_task.result["status"] == "SCE"
+        assert test_task.result["message"] == "Solution compile failed."
+        
+    def test_with_invalid_solution_should_return_correct_compile_detail_info(self, cleanup_test_sandbox: None, test_task: Task, wrong_syntax_code: str):
+        test_task.solution_code.code = wrong_syntax_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "compile_detail" in test_task.result
+        assert "judge_detail" not in test_task.result
+        assert "solution" in test_task.result["compile_detail"]
+        assert "submit" not in test_task.result["compile_detail"]
+        assert "checker" not in test_task.result["compile_detail"]
+        assert test_task.result["compile_detail"]["solution"]["exitcode"] == "1"
+        
+    def test_with_invalid_checker_should_return_cce_status(self, cleanup_test_sandbox: None, test_task: Task, wrong_syntax_code: str):
+        test_task.checker_code.code = wrong_syntax_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "status" in test_task.result
+        assert "message" in test_task.result
+        assert test_task.result["status"] == "CCE"
+        assert test_task.result["message"] == "Checker compile failed."
+
+    def test_with_invalid_checker_should_return_correct_compile_detail_info(self, cleanup_test_sandbox: None, test_task: Task, wrong_syntax_code: str):
+        test_task.checker_code.code = wrong_syntax_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "compile_detail" in test_task.result
+        assert "judge_detail" not in test_task.result
+        assert "solution" in test_task.result["compile_detail"]
+        assert "checker" in test_task.result["compile_detail"]
+        assert "submit" not in test_task.result["compile_detail"]
+        assert test_task.result["compile_detail"]["solution"]["exitcode"] == "0"
+        assert test_task.result["compile_detail"]["checker"]["exitcode"] == "1"
+
+    def test_with_invalid_user_code_should_return_ce_status(self, cleanup_test_sandbox: None, test_task: Task, wrong_syntax_code: str):
+        test_task.user_code.code = wrong_syntax_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "status" in test_task.result
+        assert "message" in test_task.result
+        assert test_task.result["status"] == "CE"
+        assert test_task.result["message"] == "Submit code compile failed."
+
+    def test_with_invalid_user_code_should_return_correct_compile_detail_info(self, cleanup_test_sandbox: None, test_task: Task, wrong_syntax_code: str):
+        test_task.user_code.code = wrong_syntax_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert "compile_detail" in test_task.result
+        assert "judge_detail" not in test_task.result
+        assert "solution" in test_task.result["compile_detail"]
+        assert "checker" in test_task.result["compile_detail"]
+        assert "submit" in test_task.result["compile_detail"]
+        assert test_task.result["compile_detail"]["solution"]["exitcode"] == "0"
+        assert test_task.result["compile_detail"]["checker"]["exitcode"] == "0"
+        assert test_task.result["compile_detail"]["submit"]["exitcode"] == "1"
