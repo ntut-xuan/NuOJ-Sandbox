@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <assert>
+#include <cassert>
 
 using namespace std;
 
@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
         if (j == "" && ans.eof())
           break;
 
-        assert(j != 6)
+        assert(j != "6");
 
         std::string p = ouf.readString();
         strAnswer = p;
