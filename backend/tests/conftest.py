@@ -44,6 +44,16 @@ def wrong_answer_code() -> str:
         return file.read()
 
 @pytest.fixture
+def checker_timed_out_code() -> str:
+    with open("./tests/test_code/checker_timed_out_code.cpp") as file:
+        return file.read()
+
+@pytest.fixture
+def checker_runtime_error_code() -> str:
+    with open("./tests/test_code/checker_runtime_error_code.cpp") as file:
+        return file.read()
+
+@pytest.fixture
 def testlib() -> str:
     with open("testlib.h") as file:
         return file.read()

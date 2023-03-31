@@ -257,3 +257,31 @@ class TestStatus:
         last_judge_detail = test_task.result["judge_detail"][-1]
         assert last_judge_detail["verdict"] == "WA"
         assert "wrong answer" in last_judge_detail["log"]
+
+    #Handle CTLE status
+    def test_with_checker_code_time_limit_exceeded_should_return_ctle_status(self, cleanup_test_sandbox: None, test_task: Task, checker_timed_out_code: str):
+        test_task.checker_code.code = checker_timed_out_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert test_task.result["status"] == "CTLE"
+        assert "judge_detail" in test_task.result
+        last_judge_detail = test_task.result["judge_detail"][-1]
+        assert last_judge_detail["verdict"] == "CTLE"
+        assert "The programming has reached the time limit." in last_judge_detail["log"]
+
+    #Handle CRE status
+    def test_with_checker_code_runtime_error_should_return_cre_status(self, cleanup_test_sandbox: None, test_task: Task, checker_runtime_error_code: str):
+        test_task.checker_code.code = checker_runtime_error_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert test_task.result["status"] == "CRE"
+        assert "judge_detail" in test_task.result
+        last_judge_detail = test_task.result["judge_detail"][-1]
+        assert last_judge_detail["verdict"] == "CRE"
+        assert "The programming return exitsig" in last_judge_detail["log"]
