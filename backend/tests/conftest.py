@@ -39,6 +39,11 @@ def timeout_code() -> str:
         return file.read()
 
 @pytest.fixture
+def wrong_answer_code() -> str:
+    with open("./tests/test_code/wrong_answer_code.cpp") as file:
+        return file.read()
+
+@pytest.fixture
 def testlib() -> str:
     with open("testlib.h") as file:
         return file.read()

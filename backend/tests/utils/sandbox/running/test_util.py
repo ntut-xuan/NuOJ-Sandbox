@@ -243,3 +243,16 @@ class TestStatus:
         last_judge_detail = test_task.result["judge_detail"][-1]
         assert last_judge_detail["verdict"] == "TLE"
         assert "The programming has reached the time limit." in last_judge_detail["log"]
+
+    def test_with_user_code_wrong_answer_should_return_wa_status(self, cleanup_test_sandbox: None, test_task: Task, wrong_answer_code: str):
+        test_task.user_code.code = wrong_answer_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert test_task.result["status"] == "WA"
+        assert "judge_detail" in test_task.result
+        last_judge_detail = test_task.result["judge_detail"][-1]
+        assert last_judge_detail["verdict"] == "WA"
+        assert "wrong answer" in last_judge_detail["log"]
