@@ -50,11 +50,11 @@ def test_judge_with_test_task_should_return_result(cleanup_test_sandbox: None, t
     
     run_task(test_task, test_task.test_case, 0)
     
-    assert int(test_task.result["compile"]["user_code"]["exitcode"]) == 0
-    assert int(test_task.result["compile"]["solution_code"]["exitcode"]) == 0
-    assert int(test_task.result["compile"]["checker_code"]["exitcode"]) == 0
-    assert test_task.result["judge"]["report"][0]["verdict"] == "AC"
-    assert test_task.result["judge"]["report"][1]["verdict"] == "AC"
+    assert int(test_task.result["compile_detail"]["submit"]["exitcode"]) == 0
+    assert int(test_task.result["compile_detail"]["solution"]["exitcode"]) == 0
+    assert int(test_task.result["compile_detail"]["checker"]["exitcode"]) == 0
+    assert test_task.result["judge_detail"][0]["verdict"] == "AC"
+    assert test_task.result["judge_detail"][1]["verdict"] == "AC"
 
 def test_with_invalid_execute_type_should_return_error_result(cleanup_test_sandbox: None, test_task: Task):
     test_task.execute_type = "Invalid_type"
@@ -201,7 +201,7 @@ class TestStatus:
         assert "judge_detail" in test_task.result
         last_judge_detail = test_task.result["judge_detail"][-1]
         assert last_judge_detail["verdict"] == "SRE"
-        assert last_judge_detail["log"] == "The solution return exitsig 8" # Since runtime error code will trigger divided-by-zero, the exitcode will be 8.
+        assert last_judge_detail["log"] == "The programming return exitsig 8" # Since runtime error code will trigger divided-by-zero, the exitcode will be 8.
 
     # Handle STLE status
     def test_with_solution_time_limit_exceeded_should_return_stle_status(self, cleanup_test_sandbox: None, test_task: Task, timeout_code: str):
