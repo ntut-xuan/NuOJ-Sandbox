@@ -27,6 +27,16 @@ def user_code() -> str:
 def wrong_syntax_code() -> str:
     with open("./tests/test_code/wrong_syntax_code.cpp") as file:
         return file.read()
+    
+@pytest.fixture
+def runtime_error_code() -> str:
+    with open("./tests/test_code/runtime_error_code.cpp") as file:
+        return file.read()
+
+@pytest.fixture
+def timeout_code() -> str:
+    with open("./tests/test_code/timed_out_code.cpp") as file:
+        return file.read()
 
 @pytest.fixture
 def testlib() -> str:

@@ -34,7 +34,15 @@ class Language(Enum):
     NONE = ""
 
 class Verdict(Enum):
-    OK = "OK"
+    AC = "AC"
     CCE = "CCE"
-    SCE = "SCE"
     CE = "CE"
+    CRE = "CRE"
+    CTLE = "CTLE"
+    OK = "OK"
+    RE = "RE"
+    SCE = "SCE"
+    SRE = "SRE"
+    STLE = "STLE"
+    TLE = "TLE"
+    WA = "WA"
