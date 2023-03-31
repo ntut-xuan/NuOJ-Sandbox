@@ -28,15 +28,6 @@ def run_task(task: Task, test_case: list[str], box_id: int):
     else:
         task.result = {"error": "Invalid execute type."}
 
-def _fetch_all_of_input_and_user_output(test_case: list[TestCase], box_id: int) -> list[dict[str, Any]]:
-    execute_results = []
-    for i in range(len(test_case)):
-        execute_results.append({
-            "input": test_case[i].value,
-            "output": read_output(i, CodeType.SUBMIT.value, box_id),
-            "answer": read_output(i, CodeType.SOLUTION.value, box_id),
-        })
-    return execute_results
 
 def _judge_code(task: Task, box_id: int):
     result: dict[str, Any] = {
