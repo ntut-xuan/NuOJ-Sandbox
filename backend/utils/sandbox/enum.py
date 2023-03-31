@@ -32,3 +32,17 @@ class Language(Enum):
     JAVA = "java"
     GO = "go"
     NONE = ""
+
+class Verdict(Enum):
+    AC = "AC"
+    CCE = "CCE"
+    CE = "CE"
+    CRE = "CRE"
+    CTLE = "CTLE"
+    OK = "OK"
+    RE = "RE"
+    SCE = "SCE"
+    SRE = "SRE"
+    STLE = "STLE"
+    TLE = "TLE"
+    WA = "WA"

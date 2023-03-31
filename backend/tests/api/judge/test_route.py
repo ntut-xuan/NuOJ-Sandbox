@@ -56,7 +56,7 @@ def test_submit_code_with_threading_should_respond_http_status_code_ok(client: F
     tracker_id = response.json["tracker_id"]
     _wait_status_finished(client, tracker_id)
     result_response: TestResponse= client.get(f"/api/result/{tracker_id}/")
-    assert result_response.json["result"]["judge"]["verdict"] == "AC"    
+    assert result_response.json["result"]["judge_detail"][0]["verdict"] == "AC"    
 
 
 def _wait_status_finished(client: FlaskClient, tracker_id: str):

@@ -26,38 +26,15 @@ def execute_code(type: CodeType, compiler: str, option: Option, testcase_index: 
     return meta_data
     
 
-def judge_code(task: Task, box_id) -> dict[str, Any] | None:
+def judge_code(task: Task, testcase_index: int, box_id) -> dict[str, Any] | None:
     """
     這是一個評測的函數，主要會編譯、執行並使用 checker 進行評測，回傳結果。
     """
-    judge_report = []
-    is_wa = False
-    test_case: list[TestCase] = task.test_case
-    
-    for i in range(len(test_case)):
-        judge_result: dict[str, Any] = _execute_checker_and_get_result(i, task.options, box_id)
-        is_wa |= (judge_result["verdict"] != "AC")
-        judge_report.append(judge_result)
-
-    result: dict[str, Any] = {
-        "report": judge_report,
-        "verdict": "WA" if is_wa else "AC",
-    }
-    return result
+    options: Option = task.options
+    meta = checker(testcase_index, options.time, options.wall_time, box_id)
+    meta_data = meta_data_to_dict(meta)
+    return meta_data
 
 
 def _is_compile_success(meta_data: dict[str, Any]) -> bool:
     return "status" not in meta_data
-
-
-def _execute_checker_and_get_result(test_case_index: int, options: Option, box_id: int) -> dict[str, Any]:
-    checker_meta = checker(test_case_index, options.time, options.wall_time, box_id)
-    checker_meta_data = meta_data_to_dict(checker_meta)
-    verdict: str = "AC" if checker_meta_data["exitcode"] == "0" else "WA"
-    judge_result = {
-        "verdict": verdict,
-        "time": checker_meta_data["time"],
-        "memory": checker_meta_data["cg-mem"],
-        "checker-log": read_checker_log(test_case_index, box_id)
-    }
-    return judge_result

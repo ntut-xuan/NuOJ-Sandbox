@@ -311,6 +311,7 @@ def execute(type, test_case_index, time, wall_time, language, box_id=0) -> str:
     
     print(f"Execute testcase {test_case_index+1}")
     subprocess.call(command, shell=True)
+    print(f"read meta {meta_name}.mt")
     meta = read_meta(box_id, name=meta_name)
     return meta
 
