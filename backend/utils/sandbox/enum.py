@@ -46,3 +46,6 @@ class Verdict(Enum):
     STLE = "STLE"
     TLE = "TLE"
     WA = "WA"
+    SMLE = "SMLE"
+    MLE = "MLE"
+    CMLE = "CMLE"

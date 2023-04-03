@@ -285,3 +285,45 @@ class TestStatus:
         last_judge_detail = test_task.result["judge_detail"][-1]
         assert last_judge_detail["verdict"] == "CRE"
         assert "The programming return exitsig" in last_judge_detail["log"]
+
+    #Handle SMLE status
+    def test_with_solution_memory_limit_exceeded_code_should_return_smle_status(self, cleanup_test_sandbox: None, test_task: Task, memoryout_code: str):
+        test_task.solution_code.code = memoryout_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert test_task.result["status"] == "SMLE"
+        assert "judge_detail" in test_task.result
+        last_judge_detail = test_task.result["judge_detail"][-1]
+        assert last_judge_detail["verdict"] == "SMLE"
+        assert "The programming has reached the memory limit." in last_judge_detail["log"]
+    
+    #Handle MLE status
+    def test_with_user_code_memory_limit_exceeded_code_should_return_mle_status(self, cleanup_test_sandbox: None, test_task: Task, memoryout_code: str):
+        test_task.user_code.code = memoryout_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert test_task.result["status"] == "MLE"
+        assert "judge_detail" in test_task.result
+        last_judge_detail = test_task.result["judge_detail"][-1]
+        assert last_judge_detail["verdict"] == "MLE"
+        assert "The programming has reached the memory limit." in last_judge_detail["log"]
+    
+    #Handle CMLE status
+    def test_with_checker_code_memory_limit_exceeded_code_should_return_cmle_status(self, cleanup_test_sandbox: None, test_task: Task, checker_memory_out_code: str):
+        test_task.checker_code.code = checker_memory_out_code
+        initialize_task(test_task, 0)
+        initialize_test_case_to_sandbox(test_task.test_case, 0)
+        
+        run_task(test_task, test_task.test_case, 0)
+        
+        assert test_task.result["status"] == "CMLE"
+        assert "judge_detail" in test_task.result
+        last_judge_detail = test_task.result["judge_detail"][-1]
+        assert last_judge_detail["verdict"] == "CMLE"
+        assert "The programming has reached the memory limit." in last_judge_detail["log"]
