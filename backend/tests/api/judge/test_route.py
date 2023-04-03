@@ -35,6 +35,7 @@ def payload(user_code: str, checker_code: str) -> dict[str, Any]:
         "execute_type": "Judge",
         "options": {
             "threading": False,
+            "memory": 131072,
             "time": 4,
             "wall_time": 4
         }
