@@ -86,7 +86,7 @@ def _execute_testcase(task: Task, testcase_index: int, box_id: int):
     execute_solution_meta = execute_code(CodeType.SOLUTION, task.solution_code.compiler, task.options, testcase_index, box_id)
     execute_result["runtime_info"] |= {"solution": _fetch_execute_info_from_meta_file(execute_solution_meta)}
     
-    if _handle_execute_exception(execute_solution_meta, execute_result, Verdict.SRE, Verdict.STLE):
+    if _handle_execute_exception(execute_solution_meta, execute_result, Verdict.SRE, Verdict.STLE, Verdict.SMLE):
         return execute_result
 
     execute_result["output_set"]["answer"] = read_output(testcase_index, CodeType.SOLUTION, box_id)
@@ -94,7 +94,7 @@ def _execute_testcase(task: Task, testcase_index: int, box_id: int):
     execute_user_code_meta = execute_code(CodeType.SUBMIT, task.user_code.compiler, task.options, testcase_index, box_id)
     execute_result["runtime_info"] |= {"submit": _fetch_execute_info_from_meta_file(execute_user_code_meta)}
     
-    if _handle_execute_exception(execute_user_code_meta, execute_result, Verdict.RE, Verdict.TLE):
+    if _handle_execute_exception(execute_user_code_meta, execute_result, Verdict.RE, Verdict.TLE, Verdict.MLE):
         return execute_result
     
     execute_result["output_set"]["submit"] = read_output(testcase_index, CodeType.SOLUTION, box_id)
@@ -102,7 +102,7 @@ def _execute_testcase(task: Task, testcase_index: int, box_id: int):
     execute_checker_code_meta = judge_code(task, testcase_index, box_id)
     execute_result["runtime_info"] |= {"checker": _fetch_execute_info_from_meta_file(execute_checker_code_meta)}
     
-    if _handle_execute_exception(execute_checker_code_meta, execute_result, Verdict.CRE, Verdict.CTLE):
+    if _handle_execute_exception(execute_checker_code_meta, execute_result, Verdict.CRE, Verdict.CTLE, Verdict.CMLE):
         return execute_result
     
     if execute_checker_code_meta["exitcode"] == "0":
@@ -115,7 +115,14 @@ def _execute_testcase(task: Task, testcase_index: int, box_id: int):
     return execute_result
     
 
-def _handle_execute_exception(meta: dict[str, Any], result: dict[str, Any], re_verdict: Verdict, tle_verdict: Verdict):
+def _handle_execute_exception(meta: dict[str, Any], result: dict[str, Any], re_verdict: Verdict, tle_verdict: Verdict, mle_verdict: Verdict):
+    # Handle MLE situation
+    if "exitsig" in meta and meta["exitsig"] == "11":
+        memory = meta["cg-mem"]
+        result["verdict"] = mle_verdict.value
+        result["log"] = f"The programming has reached the memory limit. ({memory}KB)"
+        return True
+    
     # Handle RE situation.
     if "exitsig" in meta:
         exitsig = meta["exitsig"]
@@ -129,7 +136,7 @@ def _handle_execute_exception(meta: dict[str, Any], result: dict[str, Any], re_v
         result["verdict"] = tle_verdict.value
         result["log"] = f"The programming has reached the time limit. ({time}s)"
         return True
-
+    
     return False
 
 def _fetch_compile_info_from_meta_file(meta: dict[str, Any]):

@@ -42,10 +42,20 @@ def timeout_code() -> str:
 def wrong_answer_code() -> str:
     with open("./tests/test_code/wrong_answer_code.cpp") as file:
         return file.read()
+    
+@pytest.fixture
+def memoryout_code() -> str:
+    with open("./tests/test_code/out_of_memory_code.cpp") as file:
+        return file.read()
 
 @pytest.fixture
 def checker_timed_out_code() -> str:
     with open("./tests/test_code/checker_timed_out_code.cpp") as file:
+        return file.read()
+    
+@pytest.fixture
+def checker_memory_out_code() -> str:
+    with open("./tests/test_code/checker_memory_out_code.cpp") as file:
         return file.read()
 
 @pytest.fixture
