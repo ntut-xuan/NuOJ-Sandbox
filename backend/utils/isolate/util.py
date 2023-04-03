@@ -344,7 +344,7 @@ def checker(test_case_index, time, wall_time, box_id):
     answer_name = f"{test_case_index+1}.ans"
     execute_command = f"{code_output} {input_name} {output_name} {answer_name}"
     command = generate_isolate_run_command(
-        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path, stderr=checker_msg_file_name
+        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path, stderr=checker_msg_file_name, memory=131072
     )
     
     subprocess.call(command, shell=True)

@@ -101,6 +101,7 @@ def test_task(checker_code: str, user_code: str):
         execute_type=ExecuteType.JUDGE.value,
         options=Option(
             threading=False,
+            memory=131072,
             time=2.5,
             wall_time=2.5,
         ),
