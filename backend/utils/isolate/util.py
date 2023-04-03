@@ -83,7 +83,7 @@ def generate_isolate_run_command(
     stderr: str | None = None,
     meta: str | None = None,
     dir: tuple[str, str] | None = None,
-    memory: int | None = None,
+    mem: int | None = None,
 ) -> str:
     # --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --stdin='%d.in' --stdout='%s' --meta='%s'
     options = generate_options_with_parameter(
@@ -99,7 +99,7 @@ def generate_isolate_run_command(
         open_files=2048,
         cg=True,
         dir=dir,
-        memory=memory
+        mem=mem
     )
     return f"isolate {options} --run -- {execute_command}"
 
