@@ -55,6 +55,7 @@ def box_environment():
         ("cg_mem", 4096, "--cg-mem=4096 "),
         ("cg_timing", 15, "--cg-timing=15 "),
         ("dir", ("random_file", "rw"), "--dir=random_file:rw "),
+        ("mem", 131072, "--mem=131072 "),
     ]
 )
 def test_generate_options_with_parameter_should_generate_correct_command(args_key, args_value, excepted_command):
@@ -168,7 +169,7 @@ def test_execute_should_execute_the_program(box_environment: None, user_code: st
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit_code.cpp -o submit_code.o", shell=True)
         
-    meta = execute(CodeType.SUBMIT.value, 0, 5, 5, Language.CPP.value, 0)
+    meta = execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, Language.CPP.value, 0)
     
     assert "exitcode:0" in meta
     with open("/var/local/lib/isolate/0/box/1.out") as file:
@@ -182,7 +183,7 @@ def test_execute_with_submit_code_should_generate_output_file(box_environment: N
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit_code.cpp -o submit_code.o", shell=True)
         
-    execute(CodeType.SUBMIT.value, 0, 5, 5, Language.CPP.value, 0)
+    execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, Language.CPP.value, 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.out").exists()
 
@@ -194,7 +195,7 @@ def test_execute_with_submit_code_should_generate_meta_file(box_environment: Non
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit_code.cpp -o submit_code.o", shell=True)
         
-    execute(CodeType.SUBMIT.value, 0, 5, 5, Language.CPP.value, 0)
+    execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, Language.CPP.value, 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.out.mt").exists()
 
@@ -206,7 +207,7 @@ def test_execute_with_solution_should_generate_answer_file(box_environment: None
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ solution.cpp -o solution.o", shell=True)
         
-    execute(CodeType.SOLUTION.value, 0, 5, 5, Language.CPP.value, 0)
+    execute(CodeType.SOLUTION.value, 0, 5, 5, 131072, Language.CPP.value, 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.ans").exists()
 
@@ -218,7 +219,7 @@ def test_execute_with_solution_should_generate_meta_file(box_environment: None, 
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ solution.cpp -o solution.o", shell=True)
         
-    execute(CodeType.SOLUTION.value, 0, 5, 5, Language.CPP.value, 0)
+    execute(CodeType.SOLUTION.value, 0, 5, 5, 131072, Language.CPP.value, 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.ans.mt").exists()
 

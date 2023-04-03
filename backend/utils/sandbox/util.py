@@ -20,6 +20,7 @@ class Option:
     threading: bool
     time: float
     wall_time: float
+    memory: int
     webhook_url: str | None = None
 
 @dataclass

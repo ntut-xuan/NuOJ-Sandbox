@@ -21,7 +21,8 @@ def execute_code(type: CodeType, compiler: str, option: Option, testcase_index: 
     """
     time = option.time
     wall_time = option.wall_time
-    meta = execute(type.value, testcase_index, time, wall_time, compiler, box_id)
+    memory = option.memory
+    meta = execute(type.value, testcase_index, time, wall_time, memory, compiler, box_id)
     meta_data = meta_data_to_dict(meta)
     return meta_data
     

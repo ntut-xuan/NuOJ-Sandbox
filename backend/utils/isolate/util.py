@@ -29,6 +29,7 @@ def generate_options_with_parameter(
     cg_mem: int | None = None,
     cg_timing: int | None = None,
     dir: tuple[str, str] = None,
+    mem: int | None = None
 ) -> str:
     values_options_map = {
         "--time": time,
@@ -44,6 +45,7 @@ def generate_options_with_parameter(
         "--cg-mem": cg_mem,
         "--cg-timing": cg_timing,
         "--meta": meta,
+        "--mem": mem
     }
     boolean_options_map = {
         "--stderr-to-stdout": stderr_to_stdout,
@@ -80,7 +82,8 @@ def generate_isolate_run_command(
     stdout: str | None = None,
     stderr: str | None = None,
     meta: str | None = None,
-    dir: tuple[str, str] | None = None
+    dir: tuple[str, str] | None = None,
+    mem: int | None = None,
 ) -> str:
     # --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --stdin='%d.in' --stdout='%s' --meta='%s'
     options = generate_options_with_parameter(
@@ -96,6 +99,7 @@ def generate_isolate_run_command(
         open_files=2048,
         cg=True,
         dir=dir,
+        mem=mem
     )
     return f"isolate {options} --run -- {execute_command}"
 
@@ -281,7 +285,7 @@ def compile(type, language, box_id=0) -> str:
     return read_meta(box_id, name=meta_name)
 
 
-def execute(type, test_case_index, time, wall_time, language, box_id=0) -> str:
+def execute(type, test_case_index, time, wall_time, memory, language, box_id=0) -> str:
     """
     Execute the program on the specific ID of the sandbox.
 
@@ -305,7 +309,7 @@ def execute(type, test_case_index, time, wall_time, language, box_id=0) -> str:
     input_file = f"{test_case_index+1}.in"
     output_file = f"{test_case_index+1}.{extension}"
     command = generate_isolate_run_command(
-        exec_command, box_id, wall_time, time, input_file, output_file, meta=meta_path
+        exec_command, box_id, wall_time, time, input_file, output_file, meta=meta_path, mem=memory
     )
     touch_text_file_by_file_name("init", output_file, box_id)
     
@@ -340,7 +344,7 @@ def checker(test_case_index, time, wall_time, box_id):
     answer_name = f"{test_case_index+1}.ans"
     execute_command = f"{code_output} {input_name} {output_name} {answer_name}"
     command = generate_isolate_run_command(
-        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path, stderr=checker_msg_file_name
+        execute_command, box_id, wall_time=wall_time, time=time, meta=meta_path, stderr=checker_msg_file_name, mem=131072
     )
     
     subprocess.call(command, shell=True)
