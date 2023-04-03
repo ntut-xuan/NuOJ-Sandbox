@@ -55,7 +55,7 @@ def box_environment():
         ("cg_mem", 4096, "--cg-mem=4096 "),
         ("cg_timing", 15, "--cg-timing=15 "),
         ("dir", ("random_file", "rw"), "--dir=random_file:rw "),
-        ("mem", 131072, "--mem=131072 ")
+        ("mem", 131072, "--mem=131072 "),
     ]
 )
 def test_generate_options_with_parameter_should_generate_correct_command(args_key, args_value, excepted_command):
