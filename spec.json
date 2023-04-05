@@ -103,6 +103,14 @@
                             "wall_time": {
                                 "type": "integer",
                                 "example": 4
+                            },
+                            "memory": {
+                                "type": "integer",
+                                "example": 131072
+                            },
+                            "webhook_url": {
+                                "type": "string",
+                                "example": "http://localhost/fetch_result"
                             }
                         }
                     }
