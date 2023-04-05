@@ -8,7 +8,7 @@
     "tags": [
         {
             "name": "sandbox",
-            "description": "The API about the sandbox."
+            "description": "The route to execute the sandbox."
         }
     ],
     "paths": {
