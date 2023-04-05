@@ -60,7 +60,7 @@ def test_submit_code_with_threading_should_respond_http_status_code_ok(client: F
     assert result_response.json["result"]["judge_detail"][0]["verdict"] == "AC"    
 
 def test_submit_ok_status_report_with_webhooks_parameter_should_print_successfully_message(client: FlaskClient, payload: dict[str, Any], capfd: Generator[pytest.CaptureFixture[str], None, None]):
-    payload["options"]["webhook_url"] = "http://localhost:4439/api/test/webhook"
+    payload["options"]["webhook_url"] = "http://sandbox:4439/api/test/webhook"
     
     response: TestResponse = client.post("/api/judge", json=payload)
     
@@ -70,7 +70,7 @@ def test_submit_ok_status_report_with_webhooks_parameter_should_print_successful
     assert "send successfully" in out.split("\n")[-2]
 
 def test_submit_ce_status_report_with_webhooks_parameter_should_print_failed_message(client: FlaskClient, payload: dict[str, Any], capfd: Generator[pytest.CaptureFixture[str], None, None]):
-    payload["options"]["webhook_url"] = "http://localhost:4439/api/test/webhook"
+    payload["options"]["webhook_url"] = "http://sandbox:4439/api/test/webhook"
     payload["user_code"]["code"] = ""
     
     response: TestResponse = client.post("/api/judge", json=payload)
