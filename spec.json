@@ -52,7 +52,7 @@
                                 "type": "string",
                                 "example": "#include<bits/stdc++.h> ..."
                             },
-                            "language": {
+                            "compiler": {
                                 "type": "string",
                                 "example": "cpp"
                             }
@@ -65,7 +65,7 @@
                                 "type": "string",
                                 "example": "#include<bits/stdc++.h> ..."
                             },
-                            "language": {
+                            "compiler": {
                                 "type": "string",
                                 "example": "cpp"
                             }
@@ -78,7 +78,7 @@
                                 "type": "string",
                                 "example": "#include<bits/stdc++.h> ..."
                             },
-                            "language": {
+                            "compiler": {
                                 "type": "string",
                                 "example": "cpp"
                             }
