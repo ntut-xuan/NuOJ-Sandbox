@@ -101,11 +101,7 @@ def _send_webhook_with_webhook_url(task: Task, tracker_id: int):
         if resp.status_code != 200:
             print(f"webhook_url {task.options.webhook_url} has error that occur result {tracker_id} has error.")
         else:
-            json_data = json.loads(resp.text)
-            if json_data["status"] != "OK":
-                print(f"webhook_url {task.options.webhook_url} has error that occur result {tracker_id} send failed.")
-            else:
-                print(f"webhook_url {task.options.webhook_url} send successfully.")
+            print(f"webhook_url {task.options.webhook_url} send successfully.")
 
 class FlaskThread(threading.Thread):
     def __init__(self, *args, **kwargs) -> None:
