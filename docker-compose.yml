@@ -17,4 +17,4 @@ services:
       - sandbox
     working_dir: /etc/nuoj-sandbox/backend
     command:
-      python3 -m pytest --no-header -vv ./tests/test.py
+      python3 -m pytest --no-header -vv ./tests/ --cov

@@ -2,48 +2,46 @@
 
 ## Introduction
 
-NuOJ 所使用的沙盒系統，使用 POST 傳送程式碼與測資，基於 IOI 的 Isolate 開源專案進行開發。
+The sandbox system based on [Isolate by IOI](https://github.com/ioi/isolate) for [Nu Online Judge](https://github.com/ntut-xuan/NuOJ).
 
-![img](https://camo.githubusercontent.com/d17ced33372b5d685500dcf5c8ece597ef15fd805aa1f0b767ebc6042307824b/68747470733a2f2f692e696d6775722e636f6d2f59487457364b6a2e706e67)
+We provide the routes for judging the code, it also handling various exceptions caused by submission code, solution and checker. 
+
+Moreover, we wrote a utility to operate the Isolate that provide create file, run binary, compile code, execute the code, and judge the code. (See `backend/utils/isolate/util.py`)
 
 
+## Supported platform
+
+The sandbox system needs the version 1 of the control group. We provide a dockerfile to deploy the application in Docker, and make the application can work in most of the platform.
+
+If your platfrom using the version 2 of the control group, you need to downgrade the control group to the version 1.
 
 
+## Installation
 
-## 安裝
+### Using docker compose to deploy the application
+
+First, you need the Docker to deploy the application. You should install the docker in [Docker official page](https://docker.com)
+
+Check the docker is working, and use docker-compose to deploy the application.
 
 ```
-sudo apt-get install make
-wget https://raw.githubusercontent.com/ntut-xuan/NuOJ-Sandbox/main/Makefile
-sudo make
+sudo docker compose up --build --no-deps --force--recreate
 ```
 
+And it should be deploy the application by various steps.
+
+When the deploy is successful, it should creating the application and running the tests to test the application working correctly.
+
+The applicaiton will listen in 4439 port.
 
 
-## 安裝環境
+### Failed at environment doctor
 
-|     環境     |      |
-| :----------: | :--: |
-| Ubuntu 22.04 |  ✅   |
-| Ubuntu 20.04 |  ✅   |
-| Ubuntu 18.04 |  ✅   |
+If the steps failed in check the control group, it means the version of the control group working in this machine is version 2.
 
+We provide a `env_setting.py` python script in `/backend` folder to downgrade the control group to version 1.
 
-## 支援操作
+```
+cd backend && python3 env_setting.py
+```
 
-|   操作   | 支援 |
-| :------: | :--: |
-| 編譯測試 |  ✅   |
-| 運行測試 |  ✅   |
-| 評測測試 |  ✅   |
-| 測資驗證 |      |
-
-
-
-## 支援語言
-
-|  語言  | 支援 |
-| :----: | :--: |
-|  C++   |  ✅   |
-|  Java  |      |
-| Python |      |
