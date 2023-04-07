@@ -72,6 +72,7 @@ def testlib() -> str:
 def app():
     storage_path: str = mkdtemp()
     app = create_app({"STORAGE_PATH": storage_path})
+    cleanup_sandbox(0)
     with app.app_context():
         app.config["setting"] = SettingBuilder().from_mapping({
             "sandbox_number": 1,
@@ -85,9 +86,13 @@ def app():
                         "solution": {
                             "source": "solution.cpp",
                             "dist": "solution.o"
+                        },
+                        "checker": {
+                            "source": "checker.cpp",
+                            "dist": "checker.o"
                         }
                     },
-                    "compile": "/bin/g++ --std=c++14 {source} -o {dist}",
+                    "compile": "/usr/bin/g++ --std=c++14 {source} -o {dist}",
                     "execute": "./{dist}",
                     "setting": {
                         "wall_time_limit": 3,
@@ -103,9 +108,13 @@ def app():
                         "solution": {
                             "source": "solution.c",
                             "dist": "solution.o"
+                        },
+                        "checker": {
+                            "source": "checker.c",
+                            "dist": "checker.o"
                         }
                     },
-                    "compile": "/bin/gcc --std=c11 {source} -o {dist}",
+                    "compile": "/usr/bin/gcc --std=c11 {source} -o {dist}",
                     "execute": "./{dist}",
                     "setting": {
                         "wall_time_limit": 3,
@@ -145,9 +154,9 @@ def setup_static_file_test_case(app: Flask) -> None:
 @pytest.fixture()
 def test_task(checker_code: str, user_code: str):
     return Task(
-        checker_code=CodePackage(code=checker_code, compiler="cpp"),
-        solution_code=CodePackage(code=user_code, compiler="cpp"),
-        user_code=CodePackage(code=user_code, compiler="cpp"),
+        checker_code=CodePackage(code=checker_code, compiler="c++14"),
+        solution_code=CodePackage(code=user_code, compiler="c++14"),
+        user_code=CodePackage(code=user_code, compiler="c++14"),
         execute_type=ExecuteType.JUDGE.value,
         options=Option(
             threading=False,
