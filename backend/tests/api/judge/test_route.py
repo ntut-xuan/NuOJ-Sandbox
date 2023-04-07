@@ -12,15 +12,15 @@ def payload(user_code: str, checker_code: str) -> dict[str, Any]:
     return {
         "user_code": {
             "code": user_code,
-            "compiler": "cpp"
+            "compiler": "c++14"
         },
         "solution_code": {
             "code": user_code,
-            "compiler": "cpp"
+            "compiler": "c++14"
         },
         "checker_code": {
             "code": checker_code,
-            "compiler": "cpp"
+            "compiler": "c++14"
         },
         "test_case": [
             {

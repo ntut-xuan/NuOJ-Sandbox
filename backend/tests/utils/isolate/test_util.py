@@ -3,15 +3,14 @@ from typing import Any
 from pathlib import Path
 
 import pytest
+from flask import Flask
 
 from utils.isolate.util import (
     generate_options_with_parameter, 
     generate_isolate_init_command, 
     generate_isolate_run_command, 
     generate_isolate_cleanup_command, 
-    compile_command_generator, 
     cleanup_sandbox,
-    execute_command,
     init_sandbox,
     touch_text_file,
     touch_text_file_by_file_name,
@@ -83,18 +82,6 @@ def test_generate_isolate_cleanup_command_should_generate_correct_command():
     assert isolate_command == "isolate --box-id=0 --cg  --cleanup"
 
 
-def test_generate_compile_command_should_generate_correct_command():
-    isolate_command: str = compile_command_generator(CodeType.CHECKER.value, Language.CPP.value)
-    
-    assert isolate_command == f"/usr/bin/g++ {CodeType.CHECKER.value}.cpp -o {CodeType.CHECKER.value}.o"
-
-
-def test_generate_execute_command_should_generate_correct_command():
-    isolate_command: str = execute_command(CodeType.CHECKER.value, Language.CPP.value)
-    
-    assert isolate_command == f"{CodeType.CHECKER.value}.o"
-
-
 def test_init_sandbox_should_init_the_box():
     init_sandbox(0)
     
@@ -103,15 +90,19 @@ def test_init_sandbox_should_init_the_box():
     assert not Path("/var/local/lib/isolate/0/box").exists()
 
 
-def test_touch_file_should_create_the_file_and_have_correct_data(box_environment: None):
-    touch_text_file("random_word", CodeType.SUBMIT, "cpp", 0)
+def test_touch_file_should_create_the_file_and_have_correct_data(app: Flask, box_environment: None):
+    with app.app_context():
     
-    assert Path("/var/local/lib/isolate/0/box/submit_code.cpp").exists()
-    assert Path("/var/local/lib/isolate/0/box/submit_code.cpp").read_text() == "random_word"
+        touch_text_file("random_word", CodeType.SUBMIT, "c++14", 0)
+    
+    assert Path("/var/local/lib/isolate/0/box/submit.cpp").exists()
+    assert Path("/var/local/lib/isolate/0/box/submit.cpp").read_text() == "random_word"
 
     
-def test_touch_text_file_by_file_name_should_create_the_file_and_have_correct_data(box_environment: None):
-    touch_text_file_by_file_name("random_word", "random.cpp", 0)
+def test_touch_text_file_by_file_name_should_create_the_file_and_have_correct_data(app: Flask, box_environment: None):
+    with app.app_context():
+
+        touch_text_file_by_file_name("random_word", "random.cpp", 0)
     
     assert Path("/var/local/lib/isolate/0/box/random.cpp").exists()
     assert Path("/var/local/lib/isolate/0/box/random.cpp").read_text() == "random_word"
@@ -144,87 +135,94 @@ def test_cleanup_sandbox_should_clean_the_sandbox():
     assert not Path("/var/local/lib/isolate/0/box").exists()
 
 
-def test_compile_should_compile_the_program(box_environment: None, user_code: str):
-    with open("/var/local/lib/isolate/0/box/submit_code.cpp", "w") as file:
+def test_compile_should_compile_the_program(app: Flask, box_environment: None, user_code: str):
+    with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
-        
-    meta = compile(CodeType.SUBMIT.value, Language.CPP.value, 0)
+    with app.app_context():
+
+        meta = compile(CodeType.SUBMIT.value, "c++14", 0)
     
     assert "exitcode:0" in meta
 
 
-def test_compile_should_generate_the_meta_file(box_environment: None, user_code: str):
-    with open("/var/local/lib/isolate/0/box/submit_code.cpp", "w") as file:
+def test_compile_should_generate_the_meta_file(app: Flask, box_environment: None, user_code: str):
+    with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
-        
-    compile(CodeType.SUBMIT.value, Language.CPP.value, 0)
+    with app.app_context():  
+
+        compile(CodeType.SUBMIT.value, "c++14", 0)
     
-    assert Path("/var/local/lib/isolate/0/box/submit_code.compile.mt").exists() 
+    assert Path("/var/local/lib/isolate/0/box/submit.compile.mt").exists() 
 
 
-def test_execute_should_execute_the_program(box_environment: None, user_code: str):
-    with open("/var/local/lib/isolate/0/box/submit_code.cpp", "w") as file:
+def test_execute_should_execute_the_program(app: Flask, box_environment: None, user_code: str):
+    with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
     with open("/var/local/lib/isolate/0/box/1.in", "w") as file:
         file.write("5")
-    subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit_code.cpp -o submit_code.o", shell=True)
-        
-    meta = execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, Language.CPP.value, 0)
+    subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit.cpp -o submit.o", shell=True)
+    with app.app_context():
+
+        meta = execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, "c++14", 0)
     
     assert "exitcode:0" in meta
     with open("/var/local/lib/isolate/0/box/1.out") as file:
         assert file.read() == "5"
 
 
-def test_execute_with_submit_code_should_generate_output_file(box_environment: None, user_code: str):
-    with open("/var/local/lib/isolate/0/box/submit_code.cpp", "w") as file:
+def test_execute_with_submit_code_should_generate_output_file(app: Flask, box_environment: None, user_code: str):
+    with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
     with open("/var/local/lib/isolate/0/box/1.in", "w") as file:
         file.write("5")
-    subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit_code.cpp -o submit_code.o", shell=True)
-        
-    execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, Language.CPP.value, 0)
+    subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit.cpp -o submit.o", shell=True)
+    with app.app_context():
+    
+        execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, "c++14", 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.out").exists()
 
 
-def test_execute_with_submit_code_should_generate_meta_file(box_environment: None, user_code: str):
-    with open("/var/local/lib/isolate/0/box/submit_code.cpp", "w") as file:
+def test_execute_with_submit_code_should_generate_meta_file(app: Flask, box_environment: None, user_code: str):
+    with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
     with open("/var/local/lib/isolate/0/box/1.in", "w") as file:
         file.write("5")
-    subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit_code.cpp -o submit_code.o", shell=True)
-        
-    execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, Language.CPP.value, 0)
+    subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ submit.cpp -o submit.o", shell=True)
+    with app.app_context():
+
+        execute(CodeType.SUBMIT.value, 0, 5, 5, 131072, "c++14", 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.out.mt").exists()
 
 
-def test_execute_with_solution_should_generate_answer_file(box_environment: None, user_code: str):
+def test_execute_with_solution_should_generate_answer_file(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/solution.cpp", "w") as file:
         file.write(user_code)
     with open("/var/local/lib/isolate/0/box/1.in", "w") as file:
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ solution.cpp -o solution.o", shell=True)
-        
-    execute(CodeType.SOLUTION.value, 0, 5, 5, 131072, Language.CPP.value, 0)
+    with app.app_context():
+    
+        execute(CodeType.SOLUTION.value, 0, 5, 5, 131072, "c++14", 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.ans").exists()
 
 
-def test_execute_with_solution_should_generate_meta_file(box_environment: None, user_code: str):
+def test_execute_with_solution_should_generate_meta_file(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/solution.cpp", "w") as file:
         file.write(user_code)
     with open("/var/local/lib/isolate/0/box/1.in", "w") as file:
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ solution.cpp -o solution.o", shell=True)
+    with app.app_context():
         
-    execute(CodeType.SOLUTION.value, 0, 5, 5, 131072, Language.CPP.value, 0)
+        execute(CodeType.SOLUTION.value, 0, 5, 5, 131072, "c++14", 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.ans.mt").exists()
 
 
-def test_checker_with_same_output_and_ans_should_return_exitcode_0(box_environment: None, checker_code: str, testlib: str):
+def test_checker_with_same_output_and_ans_should_return_exitcode_0(app: Flask, box_environment: None, checker_code: str, testlib: str):
     with open("/var/local/lib/isolate/0/box/checker.cpp", "w") as file:
         file.write(checker_code)
     with open("/var/local/lib/isolate/0/box/testlib.h", "w") as file:
@@ -236,13 +234,14 @@ def test_checker_with_same_output_and_ans_should_return_exitcode_0(box_environme
     with open("/var/local/lib/isolate/0/box/1.ans", "w") as file:
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ checker.cpp -o checker.o", shell=True)
-    
-    meta = checker(0, 5, 5, 0)
+    with app.app_context():
+
+        meta = checker(0, 5, 5, 0)
     
     assert "exitcode:0" in meta
 
 
-def test_checker_with_same_output_and_ans_should_return_exitcode_1(box_environment: None, checker_code: str, testlib: str):
+def test_checker_with_same_output_and_ans_should_return_exitcode_1(app: Flask, box_environment: None, checker_code: str, testlib: str):
     with open("/var/local/lib/isolate/0/box/checker.cpp", "w") as file:
         file.write(checker_code)
     with open("/var/local/lib/isolate/0/box/testlib.h", "w") as file:
@@ -254,13 +253,14 @@ def test_checker_with_same_output_and_ans_should_return_exitcode_1(box_environme
     with open("/var/local/lib/isolate/0/box/1.ans", "w") as file:
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ checker.cpp -o checker.o", shell=True)
-    
-    meta = checker(0, 5, 5, 0)
+    with app.app_context():
+
+        meta = checker(0, 5, 5, 0)
     
     assert "exitcode:1" in meta
 
 
-def test_checker_with_same_output_and_ans_should_return_exitcode_1(box_environment: None, checker_code: str, testlib: str):
+def test_checker_with_same_output_and_ans_should_return_exitcode_1(app: Flask, box_environment: None, checker_code: str, testlib: str):
     with open("/var/local/lib/isolate/0/box/checker.cpp", "w") as file:
         file.write(checker_code)
     with open("/var/local/lib/isolate/0/box/testlib.h", "w") as file:
@@ -272,13 +272,14 @@ def test_checker_with_same_output_and_ans_should_return_exitcode_1(box_environme
     with open("/var/local/lib/isolate/0/box/1.ans", "w") as file:
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ checker.cpp -o checker.o", shell=True)
-    
-    checker(0, 5, 5, 0)
+    with app.app_context():
+
+        checker(0, 5, 5, 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.checker.mt").exists()
 
 
-def test_checker_with_same_output_and_ans_should_return_exitcode_1(box_environment: None, checker_code: str, testlib: str):
+def test_checker_with_same_output_and_ans_should_return_exitcode_1(app: Flask, box_environment: None, checker_code: str, testlib: str):
     with open("/var/local/lib/isolate/0/box/checker.cpp", "w") as file:
         file.write(checker_code)
     with open("/var/local/lib/isolate/0/box/testlib.h", "w") as file:
@@ -290,7 +291,8 @@ def test_checker_with_same_output_and_ans_should_return_exitcode_1(box_environme
     with open("/var/local/lib/isolate/0/box/1.ans", "w") as file:
         file.write("5")
     subprocess.call("isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- /usr/bin/g++ checker.cpp -o checker.o", shell=True)
-    
-    checker(0, 5, 5, 0)
+    with app.app_context():
+
+        checker(0, 5, 5, 0)
     
     assert Path("/var/local/lib/isolate/0/box/1.checker.msg").exists()
