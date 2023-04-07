@@ -1,10 +1,37 @@
 import json
 from dataclasses import dataclass
+from typing import Any
+
+
+@dataclass
+class CompilerSetting:
+    file_name: dict[str, Any]
+    compile: str
+    execute: str
+    setting: dict[str, Any]
+
+    def get_submit_code_compile_command(self):
+        return self.replace_parameter_in_command(self.compile, "submit")
+
+    def get_submit_code_execute_command(self):
+        return self.replace_parameter_in_command(self.execute, "submit")
+    
+    def get_solution_compile_command(self):
+        return self.replace_parameter_in_command(self.compile, "solution")
+    
+    def get_solution_execute_command(self):
+        return self.replace_parameter_in_command(self.execute, "solution")
+
+    def replace_parameter_in_command(self, command: str, type: str):
+        command = command.replace("{source}", self.file_name[type]["source"])
+        command = command.replace("{dist}", self.file_name[type]["dist"])
+        return command
 
 @dataclass
 class Setting:
     sandbox_number: int
-    
+    compiler: dict[str, CompilerSetting]
+
 
 class SettingBuilder:
     def from_file(self, file_path: str) -> Setting:
@@ -14,4 +41,14 @@ class SettingBuilder:
             return self.from_mapping(setting_dict)
             
     def from_mapping(self, mapping: dict[str, str]) -> Setting:
-        return Setting(**mapping)
+        return Setting(
+            sandbox_number=mapping["sandbox_number"],
+            compiler=convert_compiler_dict_to_compiler_setting_object(mapping["compiler"])
+        )
+
+
+def convert_compiler_dict_to_compiler_setting_object(compiler: dict[str, Any]):
+    compiler_setting_dict: dict[str, CompilerSetting] = {}
+    for k, v in compiler.items():
+        compiler_setting_dict[k] = CompilerSetting(**v)
+    return compiler_setting_dict

@@ -73,7 +73,47 @@ def app():
     storage_path: str = mkdtemp()
     app = create_app({"STORAGE_PATH": storage_path})
     with app.app_context():
-        app.config["setting"] = SettingBuilder().from_mapping({"sandbox_number": 1})
+        app.config["setting"] = SettingBuilder().from_mapping({
+            "sandbox_number": 1,
+            "compiler": {
+                "c++14": {
+                    "file_name": {
+                        "submit": {
+                            "source": "submit.cpp",
+                            "dist": "submit.o"
+                        },
+                        "solution": {
+                            "source": "solution.cpp",
+                            "dist": "solution.o"
+                        }
+                    },
+                    "compile": "/bin/g++ --std=c++14 {source} -o {dist}",
+                    "execute": "./{dist}",
+                    "setting": {
+                        "wall_time_limit": 3,
+                        "memory_limit": 131072
+                    }
+                },
+                "c11": {
+                    "file_name": {
+                        "submit": {
+                            "source": "submit.c",
+                            "dist": "submit.o"
+                        },
+                        "solution": {
+                            "source": "solution.c",
+                            "dist": "solution.o"
+                        }
+                    },
+                    "compile": "/bin/gcc --std=c11 {source} -o {dist}",
+                    "execute": "./{dist}",
+                    "setting": {
+                        "wall_time_limit": 3,
+                        "memory_limit": 131072
+                    }
+                }
+            }
+        })
         _create_storage_folder(storage_path)
     # other setup can go here
 
