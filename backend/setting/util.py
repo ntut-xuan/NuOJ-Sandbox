@@ -22,6 +22,21 @@ class CompilerSetting:
     def get_solution_execute_command(self):
         return self.replace_parameter_in_command(self.execute, "solution")
 
+    def get_checker_compile_command(self):
+        return self.replace_parameter_in_command(self.compile, "checker")
+    
+    def get_checker_execute_command(self):
+        return self.replace_parameter_in_command(self.execute, "checker")
+
+    def get_source_filename(self, type: str):
+        if type not in self.file_name:
+            raise Exception("Unexcepted filename:", type)
+        return self.file_name[type]["source"]
+
+    def get_dist_filename(self, type: str):
+        assert type in self.file_name
+        return self.file_name[type]["dist"]
+
     def replace_parameter_in_command(self, command: str, type: str):
         command = command.replace("{source}", self.file_name[type]["source"])
         command = command.replace("{dist}", self.file_name[type]["dist"])

@@ -10,6 +10,10 @@
                 "solution": {
                     "source": "solution.cpp",
                     "dist": "solution.o"
+                },
+                "checker": {
+                    "source": "checker.cpp",
+                    "dist": "checker.o"
                 }
             },
             "compile": "/bin/g++ --std=c++14 {source} -o {dist}",
@@ -28,6 +32,10 @@
                 "solution": {
                     "source": "solution.c",
                     "dist": "solution.o"
+                },
+                "checker": {
+                    "source": "checker.c",
+                    "dist": "checker.o"
                 }
             },
             "compile": "/bin/gcc --std=c11 {source} -o {dist}",
