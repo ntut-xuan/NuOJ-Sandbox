@@ -13,8 +13,9 @@ Moreover, we wrote a utility to operate the Isolate that provide create file, ru
 
 The sandbox system needs the version 1 of the control group. We provide a dockerfile to deploy the application in Docker, and make the application can work in most of the platform.
 
-If your platfrom using the version 2 of the control group, you need to downgrade the control group to the version 1.
+If your platfrom using the version 2 of the control group, you need to downgrade the control group to the version 1. 
 
+The downgrade of the control group only work on Linux platform.
 
 ## Installation
 
@@ -25,7 +26,7 @@ First, you need the Docker to deploy the application. You should install the doc
 Check the docker is working, and use docker-compose to deploy the application.
 
 ```
-sudo docker compose up --build --no-deps --force--recreate
+docker compose up --build --no-deps --force-recreate
 ```
 
 And it should be deploy the application by various steps.
@@ -40,6 +41,8 @@ The applicaiton will listen in 4439 port.
 If the steps failed in check the control group, it means the version of the control group working in this machine is version 2.
 
 We provide a `env_setting.py` python script in `/backend` folder to downgrade the control group to version 1.
+
+The script only work in Linux platform since the control group of WSL is version 1.
 
 ```
 cd backend && python3 env_setting.py
