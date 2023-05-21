@@ -16,10 +16,10 @@ jobs:
     - name: Disable SWAP ASLR THS
       run:
         sudo swapoff -a
-        sudo echo "0" > /proc/sys/kernel/randomize_va_space
-        sudo echo "never" > /sys/kernel/mm/transparent_hugepage/enabled
-        sudo echo "never" > /sys/kernel/mm/transparent_hugepage/defrag
-        sudo echo "never" > /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
+        echo "0" | sudo tee /proc/sys/kernel/randomize_va_space
+        sudo echo "never" | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+        sudo echo "never" | sudo tee /sys/kernel/mm/transparent_hugepage/defrag
+        sudo echo "never" | sudo tee /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
     
     - name: Start containers
       run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
