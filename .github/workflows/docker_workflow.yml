@@ -14,7 +14,7 @@ jobs:
         ls
     
     - name: Disable SWAP ASLR THS
-      run:
+      run: |
         sudo swapoff -a
         echo "0" | sudo tee /proc/sys/kernel/randomize_va_space
         sudo echo "never" | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
