@@ -12,7 +12,11 @@ jobs:
       run: |
         cd /sys/fs/cgroup/memory
         ls
-
+    
+    - name: Disable SWAP
+      run:
+        swapoff -a
+    
     - name: Start containers
       run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
 
