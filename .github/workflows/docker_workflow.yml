@@ -13,9 +13,13 @@ jobs:
         cd /sys/fs/cgroup/memory
         ls
     
-    - name: Disable SWAP
+    - name: Disable SWAP ASLR THS
       run:
         sudo swapoff -a
+        sudo echo "0" > /sys/proc/kernel/randomize_va_space
+        sudo echo "never" > /sys/kernel/mm/transparent_hugepage/enabled
+        sudo echo "never" > /sys/kernel/mm/transparent_hugepage/defrag
+        sudo echo "never" > /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
     
     - name: Start containers
       run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
