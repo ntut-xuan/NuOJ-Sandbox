@@ -15,7 +15,7 @@ jobs:
     
     - name: Disable SWAP
       run:
-        swapoff -a
+        sudo swapoff -a
     
     - name: Start containers
       run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
