@@ -21,11 +21,11 @@ aslr_check() {
     local val
     if val=$(cat /proc/sys/kernel/randomize_va_space 2>/dev/null) ; then
         if [ "$val" -ne 0 ] ; then
-            echo "[  FAIL  ] ASLR"
+            echo "[  FAIL  ] Address Space Layout Randomization"
             exit 1
         fi
     else
-        echo "[  SKIP  ] ASLR"
+        echo "[  SKIP  ] Address Space Layout Randomization"
     fi
 }
 
@@ -35,7 +35,7 @@ thp_check() {
         case $val in
             *'[never]'*) ;;
             *)
-            echo "[  FAIL  ] THP"
+            echo "[  FAIL  ] Transparent Hugepage Support"
             exit 1
         esac
     fi
@@ -43,13 +43,13 @@ thp_check() {
         case $val in
             *'[never]'*) ;;
             *) 
-            echo "[  FAIL  ] THP"
+            echo "[  FAIL  ] Transparent Hugepage Support"
             exit 1
         esac
     fi
     if val=$(cat /sys/kernel/mm/transparent_hugepage/khugepaged/defrag 2>/dev/null) ; then
         if [ "$val" -ne 0 ] ; then
-            echo "[  FAIL  ] THP"
+            echo "[  FAIL  ] Transparent Hugepage Support"
             exit 1
         fi
     fi
@@ -64,8 +64,8 @@ swap_check
 echo "[   OK   ] Swap"
 
 aslr_check
-echo "[   OK   ] ASLR"
+echo "[   OK   ] Address Space Layout Randomization"
 
 thp_check
-echo "[   OK   ] THP"
+echo "[   OK   ] Transparent Hugepage Support"
 exit 0
