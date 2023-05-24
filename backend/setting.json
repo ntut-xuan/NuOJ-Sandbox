@@ -16,7 +16,7 @@
                     "dist": "checker.o"
                 }
             },
-            "compile": "/bin/g++ --std=c++14 {source} -o {dist}",
+            "compile": "/usr/bin/g++ --std=c++14 {source} -o {dist}",
             "execute": "./{dist}",
             "setting": {
                 "wall_time_limit": 3,
@@ -38,7 +38,7 @@
                     "dist": "checker.o"
                 }
             },
-            "compile": "/bin/gcc --std=c11 {source} -o {dist}",
+            "compile": "/usr/bin/gcc --std=c11 {source} -o {dist}",
             "execute": "./{dist}",
             "setting": {
                 "wall_time_limit": 3,
