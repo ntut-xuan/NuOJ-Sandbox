@@ -74,18 +74,18 @@ class TestInitializeTask:
 
 class TestInitializeTestCase:
     def test_with_plain_text_test_case_should_place_the_test_case_to_sandbox(self, app: Flask, cleanup_test_sandbox: None, test_task: Task):
-        init_sandbox(0)
-        
         with app.app_context():
+            init_sandbox(0)
+        
             initialize_test_case_to_sandbox(test_task.test_case, 0)
         
         assert Path("/var/local/lib/isolate/0/box/1.in").exists()
         assert Path("/var/local/lib/isolate/0/box/2.in").exists()
 
     def test_with_static_file_test_case_should_place_the_test_case_to_sandbox(self, app: Flask, cleanup_test_sandbox: None, setup_static_file_test_case: None, test_task: Task):
-        init_sandbox(0)
         test_task.test_case = [TestCase(TestCaseType.STATIC_FILE.value, "file1.test"), TestCase(TestCaseType.STATIC_FILE.value, "file2.test")]
         with app.app_context():
+            init_sandbox(0)
         
             initialize_test_case_to_sandbox(test_task.test_case, 0)
             
