@@ -58,7 +58,7 @@ def box_environment():
         ("mem", 131072, "--mem=131072 "),
     ]
 )
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_generate_options_with_parameter_should_generate_correct_command(app: Flask, args_key, args_value, excepted_command):
     with app.app_context():
         args: dict[str, Any] ={args_key: args_value}
@@ -67,7 +67,7 @@ def test_generate_options_with_parameter_should_generate_correct_command(app: Fl
         assert command == excepted_command
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_generate_isolate_initialize_command_should_generate_correct_command(app: Flask):
     with app.app_context():
         isolate_command: str = generate_isolate_init_command(0)
@@ -75,7 +75,7 @@ def test_generate_isolate_initialize_command_should_generate_correct_command(app
         assert isolate_command == "isolate --box-id=0 --cg  --init"
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_generate_isolate_run_command_should_generate_correct_command(app: Flask):
     with app.app_context():
         isolate_command: str = generate_isolate_run_command("some_execute_command", 0)
@@ -83,7 +83,7 @@ def test_generate_isolate_run_command_should_generate_correct_command(app: Flask
         assert isolate_command == "isolate --box-id=0 --open-files=2048 --full-env --processes --cg  --run -- some_execute_command"
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_generate_isolate_cleanup_command_should_generate_correct_command(app: Flask):
     with app.app_context():
         isolate_command: str = generate_isolate_cleanup_command(0)
@@ -91,7 +91,7 @@ def test_generate_isolate_cleanup_command_should_generate_correct_command(app: F
         assert isolate_command == "isolate --box-id=0 --cg  --cleanup"
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_init_sandbox_should_init_the_box(app: Flask):
     with app.app_context():
         init_sandbox(0)
@@ -101,7 +101,7 @@ def test_init_sandbox_should_init_the_box(app: Flask):
         assert not Path("/var/local/lib/isolate/0/box").exists()
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_touch_file_should_create_the_file_and_have_correct_data(app: Flask, box_environment: None):
     with app.app_context():
     
@@ -111,7 +111,7 @@ def test_touch_file_should_create_the_file_and_have_correct_data(app: Flask, box
     assert Path("/var/local/lib/isolate/0/box/submit.cpp").read_text() == "random_word"
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_touch_text_file_by_file_name_should_create_the_file_and_have_correct_data(app: Flask, box_environment: None):
     with app.app_context():
 
@@ -121,7 +121,7 @@ def test_touch_text_file_by_file_name_should_create_the_file_and_have_correct_da
     assert Path("/var/local/lib/isolate/0/box/random.cpp").read_text() == "random_word"
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_read_meta_should_read_the_correct_meta_data(box_environment: None):
     with open("/var/local/lib/isolate/0/box/meta.mt", "w") as file:
         file.write("random_meta")
@@ -131,7 +131,7 @@ def test_read_meta_should_read_the_correct_meta_data(box_environment: None):
     assert meta == "random_meta"
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_read_output_should_read_the_correct_meta_data(box_environment: None):
     with open("/var/local/lib/isolate/0/box/1.ans", "w") as file:
         file.write("random_answer")
@@ -141,7 +141,7 @@ def test_read_output_should_read_the_correct_meta_data(box_environment: None):
     assert output == "random_answer"
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_cleanup_sandbox_should_clean_the_sandbox(app: Flask):
     subprocess.call("isolate --box-id=0 --init", shell=True)
     assert Path("/var/local/lib/isolate/0/box").exists()
@@ -152,7 +152,7 @@ def test_cleanup_sandbox_should_clean_the_sandbox(app: Flask):
         assert not Path("/var/local/lib/isolate/0/box").exists()
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_compile_should_compile_the_program(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
@@ -163,7 +163,7 @@ def test_compile_should_compile_the_program(app: Flask, box_environment: None, u
     assert "exitcode:0" in meta
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_compile_should_generate_the_meta_file(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
@@ -174,7 +174,7 @@ def test_compile_should_generate_the_meta_file(app: Flask, box_environment: None
     assert Path("/var/local/lib/isolate/0/box/submit.compile.mt").exists() 
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_execute_should_execute_the_program(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
@@ -190,7 +190,7 @@ def test_execute_should_execute_the_program(app: Flask, box_environment: None, u
         assert file.read() == "5"
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_execute_with_submit_code_should_generate_output_file(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
@@ -204,7 +204,7 @@ def test_execute_with_submit_code_should_generate_output_file(app: Flask, box_en
     assert Path("/var/local/lib/isolate/0/box/1.out").exists()
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_execute_with_submit_code_should_generate_meta_file(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/submit.cpp", "w") as file:
         file.write(user_code)
@@ -218,7 +218,7 @@ def test_execute_with_submit_code_should_generate_meta_file(app: Flask, box_envi
     assert Path("/var/local/lib/isolate/0/box/1.out.mt").exists()
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_execute_with_solution_should_generate_answer_file(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/solution.cpp", "w") as file:
         file.write(user_code)
@@ -232,7 +232,7 @@ def test_execute_with_solution_should_generate_answer_file(app: Flask, box_envir
     assert Path("/var/local/lib/isolate/0/box/1.ans").exists()
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_execute_with_solution_should_generate_meta_file(app: Flask, box_environment: None, user_code: str):
     with open("/var/local/lib/isolate/0/box/solution.cpp", "w") as file:
         file.write(user_code)
@@ -246,7 +246,7 @@ def test_execute_with_solution_should_generate_meta_file(app: Flask, box_environ
     assert Path("/var/local/lib/isolate/0/box/1.ans.mt").exists()
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_checker_with_same_output_and_ans_should_return_exitcode_0(app: Flask, box_environment: None, checker_code: str, testlib: str):
     with open("/var/local/lib/isolate/0/box/checker.cpp", "w") as file:
         file.write(checker_code)
@@ -266,7 +266,7 @@ def test_checker_with_same_output_and_ans_should_return_exitcode_0(app: Flask, b
     assert "exitcode:0" in meta
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_checker_with_same_output_and_ans_should_return_exitcode_1(app: Flask, box_environment: None, checker_code: str, testlib: str):
     with open("/var/local/lib/isolate/0/box/checker.cpp", "w") as file:
         file.write(checker_code)
@@ -286,7 +286,7 @@ def test_checker_with_same_output_and_ans_should_return_exitcode_1(app: Flask, b
     assert "exitcode:1" in meta
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_checker_with_same_output_and_ans_should_return_exitcode_1(app: Flask, box_environment: None, checker_code: str, testlib: str):
     with open("/var/local/lib/isolate/0/box/checker.cpp", "w") as file:
         file.write(checker_code)
@@ -306,7 +306,7 @@ def test_checker_with_same_output_and_ans_should_return_exitcode_1(app: Flask, b
     assert Path("/var/local/lib/isolate/0/box/1.checker.mt").exists()
 
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", 0) == 0, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 def test_checker_with_same_output_and_ans_should_return_exitcode_1(app: Flask, box_environment: None, checker_code: str, testlib: str):
     with open("/var/local/lib/isolate/0/box/checker.cpp", "w") as file:
         file.write(checker_code)
