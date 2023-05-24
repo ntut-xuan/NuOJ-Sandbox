@@ -12,7 +12,7 @@ services:
     build: .
     environment:
       - PYTHONUNBUFFERED=1
-      - NUOJ_SANDBOX_ENABLE_CG=${NUOJ_SANDBOX_ENABLE_CG}
+      - NUOJ_SANDBOX_ENABLE_CG=1
     privileged: true
     depends_on:
       - sandbox
