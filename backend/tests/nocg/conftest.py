@@ -1,4 +1,5 @@
 import json
+from os import environ
 from tempfile import mkdtemp
 from pathlib import Path
 from shutil import rmtree
@@ -72,8 +73,9 @@ def testlib() -> str:
 def app():
     storage_path: str = mkdtemp()
     app = create_app({"STORAGE_PATH": storage_path})
-    cleanup_sandbox(0)
+    app.config["control_group"] = False
     with app.app_context():
+        cleanup_sandbox(0)
         app.config["setting"] = SettingBuilder().from_mapping({
             "sandbox_number": 1,
             "compiler": {
@@ -138,8 +140,9 @@ def client(app):
 
 
 @pytest.fixture
-def cleanup_test_sandbox():
-    cleanup_sandbox(0)
+def cleanup_test_sandbox(app: Flask):
+    with app.app_context():
+        cleanup_sandbox(0)
 
 
 @pytest.fixture

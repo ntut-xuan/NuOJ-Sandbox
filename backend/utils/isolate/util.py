@@ -88,6 +88,7 @@ def generate_isolate_run_command(
     dir: tuple[str, str] | None = None,
     mem: int | None = None,
 ) -> str:
+    control_group: bool = current_app.config["control_group"]
     # --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --stdin='%d.in' --stdout='%s' --meta='%s'
     options = generate_options_with_parameter(
         box_id=box_id,
@@ -100,7 +101,7 @@ def generate_isolate_run_command(
         max_processes=True,
         meta=meta,
         open_files=2048,
-        cg=True,
+        cg=control_group,
         dir=dir,
         mem=mem
     )
@@ -108,12 +109,14 @@ def generate_isolate_run_command(
 
 
 def generate_isolate_init_command(box_id: int) -> str:
-    options = generate_options_with_parameter(cg=True, box_id=box_id)
+    control_group: bool = current_app.config["control_group"]
+    options = generate_options_with_parameter(cg=control_group, box_id=box_id)
     return f"isolate {options} --init"
 
 
 def generate_isolate_cleanup_command(box_id: int) -> str:
-    options = generate_options_with_parameter(cg=True, box_id=box_id)
+    control_group: bool = current_app.config["control_group"]
+    options = generate_options_with_parameter(cg=control_group, box_id=box_id)
     return f"isolate {options} --cleanup"
 
 
