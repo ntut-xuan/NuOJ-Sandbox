@@ -12,10 +12,10 @@ from tests.nocg.utils.sandbox.initialize.test_util import (
 # We need to filter the warning by warnings.filterwarnings.
 warnings.filterwarnings("ignore", message="cannot collect test class .+")
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", False) == False, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 class TestInitializeTask(TestInitializeTask):
     pass
 
-@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", False) == False, reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
+@pytest.mark.skipif(environ.get("NUOJ_SANDBOX_ENABLE_CG", "0") == "0", reason="No or not enable CG Environment Variable [NUOJ_SANDBOX_ENABLE_CG]")
 class TestInitializeTestCase(TestInitializeTestCase):
     pass
