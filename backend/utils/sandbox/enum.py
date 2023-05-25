@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class CodeType(Enum):
-    SUBMIT = "submit"
+    SUBMIT = "submit_code"
     SOLUTION = "solution"
     VALIDATE = "validate"
     CHECKER = "checker"
