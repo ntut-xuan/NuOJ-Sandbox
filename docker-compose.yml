@@ -3,8 +3,6 @@ version: "3.8"
 services:
   sandbox:
     build: .
-    environment:
-      - NUOJ_SANDBOX_ENABLE_CG=${NUOJ_SANDBOX_ENABLE_CG}
     tty: true
     privileged: true
     restart: always
@@ -14,11 +12,9 @@ services:
     build: .
     environment:
       - PYTHONUNBUFFERED=1
-      - NUOJ_SANDBOX_ENABLE_CG=${NUOJ_SANDBOX_ENABLE_CG}
     privileged: true
     depends_on:
       - sandbox
     working_dir: /etc/nuoj-sandbox/backend
     command:
       python3 -m pytest --no-header -vv ./tests/ --cov
-  

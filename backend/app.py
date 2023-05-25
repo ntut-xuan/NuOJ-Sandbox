@@ -4,7 +4,6 @@ import threading
 import traceback
 import uuid
 from dataclasses import dataclass, field
-from os import environ
 from typing import Any
 from threading import Semaphore
 
@@ -21,7 +20,6 @@ from flask import Flask, current_app
 
 def create_app(config_mapping: dict[str, str] = None) -> Flask:
     app = Flask(__name__)
-    enable_cg: bool = environ.get('NUOJ_SANDBOX_ENABLE_CG', 0) == 1
     
     if config_mapping is not None:
         app.config.from_mapping(config_mapping)
@@ -34,7 +32,6 @@ def create_app(config_mapping: dict[str, str] = None) -> Flask:
     app.config["submission"] = []
     app.config["result_mapping"] = {}
     app.config["semaphores"] = Semaphore(setting.sandbox_number)
-    app.config["control_group"] = enable_cg
     
     app.register_blueprint(judge_api_bp)
     app.register_blueprint(result_api_bp)

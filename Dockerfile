@@ -24,7 +24,7 @@ RUN make install
 # cd to nuoj-sandbox
 WORKDIR /etc/nuoj-sandbox
 COPY . /etc/nuoj-sandbox/
-# RUN sh backend/env_doctor.sh
+RUN sh backend/env_doctor.sh
 # install pyhton package from pip
 RUN pip3 install -r requirements.txt
 # expose port with 4439
