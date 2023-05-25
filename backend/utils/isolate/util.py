@@ -8,6 +8,9 @@ import subprocess
 import os
 from utils.sandbox.enum import CodeType, Language
 
+from flask import current_app
+
+from setting.util import CompilerSetting, Setting
 
 def generate_options_with_parameter(
     box_id: int | None = None,
@@ -85,6 +88,7 @@ def generate_isolate_run_command(
     dir: tuple[str, str] | None = None,
     mem: int | None = None,
 ) -> str:
+    control_group: bool = current_app.config["control_group"]
     # --box-id=%d --time=%d --wall-time=%d --cg-mem 256000 -p --full-env --meta='%s' --stdin='%d.in' --stdout='%s' --meta='%s'
     options = generate_options_with_parameter(
         box_id=box_id,
@@ -97,7 +101,7 @@ def generate_isolate_run_command(
         max_processes=True,
         meta=meta,
         open_files=2048,
-        cg=True,
+        cg=control_group,
         dir=dir,
         mem=mem
     )
@@ -105,36 +109,48 @@ def generate_isolate_run_command(
 
 
 def generate_isolate_init_command(box_id: int) -> str:
-    options = generate_options_with_parameter(cg=True, box_id=box_id)
+    control_group: bool = current_app.config["control_group"]
+    options = generate_options_with_parameter(cg=control_group, box_id=box_id)
     return f"isolate {options} --init"
 
 
 def generate_isolate_cleanup_command(box_id: int) -> str:
-    options = generate_options_with_parameter(cg=True, box_id=box_id)
+    control_group: bool = current_app.config["control_group"]
+    options = generate_options_with_parameter(cg=control_group, box_id=box_id)
     return f"isolate {options} --cleanup"
 
 
-def compile_command_generator(type, language: str):
-    java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
-    type = java_type if language == Language.JAVA.value else type
-    compile_command_map = {
-        Language.CPP.value: "/usr/bin/g++ %s.cpp -o %s.o" % (type, type),
-        Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/javac %s.java" % type,
-        Language.PYTHON.value: "/usr/bin/echo 'Python compile skiped.'",
-        Language.GO.value: f"/usr/bin/go build -o {type}.o {type}.go",
-    }
-    return compile_command_map[language]
+def get_compiler_settings():
+    compiler_settings: dict[str, CompilerSetting] | None = None
 
+    with current_app.app_context():
+        setting: Setting = current_app.config["setting"]
+        compiler_settings = setting.compiler
 
-def execute_command(type, langauge: Language):
-    java_type = "Main" if type == CodeType.SUBMIT.value else "Solution"
-    execute_command_map = {
-        Language.CPP.value: "%s.o" % type,
-        Language.JAVA.value: "/usr/bin/jdk-18.0.2.1/bin/java %s" % java_type,
-        Language.PYTHON.value: "/usr/bin/python3 %s.py" % type,
-        Language.GO.value: f"{type}.o",
-    }
-    return execute_command_map[langauge]
+    assert compiler_settings is not None
+    return compiler_settings
+
+def get_compile_command(type: str, compiler: str):
+    compiler_settings: dict[str, CompilerSetting] = get_compiler_settings()
+
+    if type == CodeType.SUBMIT.value:
+        return compiler_settings[compiler].get_submit_code_compile_command()
+    
+    if type == CodeType.SOLUTION.value:
+        return compiler_settings[compiler].get_solution_compile_command()
+    
+    return compiler_settings[compiler].get_checker_compile_command()
+
+def get_execute_command(type, compiler: str):
+    compiler_settings: dict[str, CompilerSetting] = get_compiler_settings()
+
+    if type == CodeType.SUBMIT.value:
+        return compiler_settings[compiler].get_submit_code_execute_command()
+    
+    if type == CodeType.SOLUTION.value:
+        return compiler_settings[compiler].get_solution_execute_command()
+    
+    return compiler_settings[compiler].get_checker_execute_command()
 
 
 def init_sandbox(box_id=0):
@@ -165,9 +181,9 @@ def touch_text_file(text, type: CodeType, compiler: str, box_id=0) -> tuple:
             The second element is the status, True for success, False otherwise.
 
     """
-    java_type = "Main" if type == CodeType.SUBMIT else "Solution"
-    type = java_type if compiler == Language.JAVA.value else type
-    path = "/var/local/lib/isolate/%d/box/%s.%s" % (box_id, type.value, compiler)
+    compiler_settings: dict[str, CompilerSetting] = get_compiler_settings()
+    source_filename = compiler_settings[compiler].get_source_filename(type.value)
+    path = "/var/local/lib/isolate/%d/box/%s" % (box_id, source_filename)
     print("create file at", path)
     with open(path, "w") as code_file:
         code_file.write(text)
@@ -276,7 +292,7 @@ def compile(type, language, box_id=0) -> str:
     """
     meta_name = f"{type}.compile"
     meta_path = f"/var/local/lib/isolate/{box_id}/box/{meta_name}.mt"
-    compile_command = compile_command_generator(type, language)
+    compile_command = get_compile_command(type, language)
     command = generate_isolate_run_command(
         compile_command, box_id, time=10, meta=meta_path
     )
@@ -301,7 +317,7 @@ def execute(type, test_case_index, time, wall_time, memory, language, box_id=0) 
             A string of results on the meta file after finished execute.
 
     """
-    exec_command = execute_command(type, language)
+    exec_command = get_execute_command(type, language)
     extension = "out" if CodeType.SUBMIT.value == type else "ans"
     meta_name = f"{test_case_index+1}.{extension}"
     meta_path = f"/var/local/lib/isolate/{box_id}/box/{meta_name}.mt"

@@ -118,7 +118,7 @@ def _execute_testcase(task: Task, testcase_index: int, box_id: int):
 def _handle_execute_exception(meta: dict[str, Any], result: dict[str, Any], re_verdict: Verdict, tle_verdict: Verdict, mle_verdict: Verdict):
     # Handle MLE situation
     if "exitsig" in meta and meta["exitsig"] == "11":
-        memory = meta["cg-mem"]
+        memory = meta["max-rss"]
         result["verdict"] = mle_verdict.value
         result["log"] = f"The programming has reached the memory limit. ({memory}KB)"
         return True
@@ -140,11 +140,11 @@ def _handle_execute_exception(meta: dict[str, Any], result: dict[str, Any], re_v
     return False
 
 def _fetch_compile_info_from_meta_file(meta: dict[str, Any]):
-    return {"time": meta["time"], "memory": meta["cg-mem"], "exitcode": meta["exitcode"]}
+    return {"time": meta["time"], "memory": meta["max-rss"], "exitcode": meta["exitcode"]}
 
 
 def _fetch_execute_info_from_meta_file(meta: dict[str, Any]):
-    execute_info: dict[str, Any] = {"time": meta["time"], "memory": meta["cg-mem"]}
+    execute_info: dict[str, Any] = {"time": meta["time"], "memory": meta["max-rss"]}
 
     if "exitsig" in meta:
         execute_info |= {"exitsig": meta["exitsig"]}

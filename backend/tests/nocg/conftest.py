@@ -1,4 +1,5 @@
 import json
+from os import environ
 from tempfile import mkdtemp
 from pathlib import Path
 from shutil import rmtree
@@ -72,8 +73,58 @@ def testlib() -> str:
 def app():
     storage_path: str = mkdtemp()
     app = create_app({"STORAGE_PATH": storage_path})
+    app.config["control_group"] = False
     with app.app_context():
-        app.config["setting"] = SettingBuilder().from_mapping({"sandbox_number": 1})
+        cleanup_sandbox(0)
+        app.config["setting"] = SettingBuilder().from_mapping({
+            "sandbox_number": 1,
+            "compiler": {
+                "c++14": {
+                    "file_name": {
+                        "submit": {
+                            "source": "submit.cpp",
+                            "dist": "submit.o"
+                        },
+                        "solution": {
+                            "source": "solution.cpp",
+                            "dist": "solution.o"
+                        },
+                        "checker": {
+                            "source": "checker.cpp",
+                            "dist": "checker.o"
+                        }
+                    },
+                    "compile": "/usr/bin/g++ --std=c++14 {source} -o {dist}",
+                    "execute": "./{dist}",
+                    "setting": {
+                        "wall_time_limit": 3,
+                        "memory_limit": 131072
+                    }
+                },
+                "c11": {
+                    "file_name": {
+                        "submit": {
+                            "source": "submit.c",
+                            "dist": "submit.o"
+                        },
+                        "solution": {
+                            "source": "solution.c",
+                            "dist": "solution.o"
+                        },
+                        "checker": {
+                            "source": "checker.c",
+                            "dist": "checker.o"
+                        }
+                    },
+                    "compile": "/usr/bin/gcc --std=c11 {source} -o {dist}",
+                    "execute": "./{dist}",
+                    "setting": {
+                        "wall_time_limit": 3,
+                        "memory_limit": 131072
+                    }
+                }
+            }
+        })
         _create_storage_folder(storage_path)
     # other setup can go here
 
@@ -89,8 +140,9 @@ def client(app):
 
 
 @pytest.fixture
-def cleanup_test_sandbox():
-    cleanup_sandbox(0)
+def cleanup_test_sandbox(app: Flask):
+    with app.app_context():
+        cleanup_sandbox(0)
 
 
 @pytest.fixture
@@ -105,9 +157,9 @@ def setup_static_file_test_case(app: Flask) -> None:
 @pytest.fixture()
 def test_task(checker_code: str, user_code: str):
     return Task(
-        checker_code=CodePackage(code=checker_code, compiler="cpp"),
-        solution_code=CodePackage(code=user_code, compiler="cpp"),
-        user_code=CodePackage(code=user_code, compiler="cpp"),
+        checker_code=CodePackage(code=checker_code, compiler="c++14"),
+        solution_code=CodePackage(code=user_code, compiler="c++14"),
+        user_code=CodePackage(code=user_code, compiler="c++14"),
         execute_type=ExecuteType.JUDGE.value,
         options=Option(
             threading=False,

@@ -1,17 +1,17 @@
-name: Docker Compose Actions Workflow
+name: Docker CI [Disable CG]
 on: push
 jobs:
   docker:
     timeout-minutes: 10
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+    env:
+      NUOJ_SANDBOX_ENABLE_CG: 0
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: Check Control Group
-      run: |
-        cd /sys/fs/cgroup/memory
-        ls
+    
+    - name: Check config
+      run: docker compose config
 
     - name: Start containers
       run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
