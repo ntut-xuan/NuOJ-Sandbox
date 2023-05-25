@@ -1,3 +1,49 @@
 {
-    "sandbox_number": 5
+    "sandbox_number": 5,
+    "compiler": {
+        "c++14": {
+            "file_name": {
+                "submit": {
+                    "source": "submit.cpp",
+                    "dist": "submit.o"
+                },
+                "solution": {
+                    "source": "solution.cpp",
+                    "dist": "solution.o"
+                },
+                "checker": {
+                    "source": "checker.cpp",
+                    "dist": "checker.o"
+                }
+            },
+            "compile": "/usr/bin/g++ --std=c++14 {source} -o {dist}",
+            "execute": "./{dist}",
+            "setting": {
+                "wall_time_limit": 3,
+                "memory_limit": 131072
+            }
+        },
+        "c11": {
+            "file_name": {
+                "submit": {
+                    "source": "submit.c",
+                    "dist": "submit.o"
+                },
+                "solution": {
+                    "source": "solution.c",
+                    "dist": "solution.o"
+                },
+                "checker": {
+                    "source": "checker.c",
+                    "dist": "checker.o"
+                }
+            },
+            "compile": "/usr/bin/gcc --std=c11 {source} -o {dist}",
+            "execute": "./{dist}",
+            "setting": {
+                "wall_time_limit": 3,
+                "memory_limit": 131072
+            }
+        }
+    }
 }
