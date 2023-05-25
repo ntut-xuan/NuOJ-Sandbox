@@ -1,9 +1,11 @@
-name: Docker Compose Actions Workflow
+name: Docker CI [Enable CG]
 on: push
 jobs:
   docker:
     timeout-minutes: 10
     runs-on: ubuntu-20.04
+    env:
+      NUOJ_SANDBOX_ENABLE_CG: 1
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -21,8 +23,8 @@ jobs:
         sudo echo "never" | sudo tee /sys/kernel/mm/transparent_hugepage/defrag
         sudo echo "0" | sudo tee /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
     
-    - name: Enable NUOJ_SANDBOX_ENABLE_CG
-      run: export NUOJ_SANDBOX_ENABLE_CG=1
+    - name: Check config
+      run: docker compose config
 
     - name: Start containers
       run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
