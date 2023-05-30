@@ -17,8 +17,6 @@ from api.test_case.route import test_case_api_bp
 from setting.util import Setting, SettingBuilder
 
 from flask import Flask, current_app
-from loguru import logger
-from minio import Minio
 
 
 def create_app(config_mapping: dict[str, str] = None) -> Flask:
@@ -37,7 +35,6 @@ def create_app(config_mapping: dict[str, str] = None) -> Flask:
     app.config["result_mapping"] = {}
     app.config["semaphores"] = Semaphore(setting.sandbox_number)
     app.config["control_group"] = enable_cg
-    app.config["minio_client"] = _initialize_minio_storage_server(setting)
     
     app.register_blueprint(judge_api_bp)
     app.register_blueprint(result_api_bp)
@@ -50,27 +47,6 @@ def create_app(config_mapping: dict[str, str] = None) -> Flask:
     pop_work_timer.start()
 
     return app
-
-
-def _initialize_minio_storage_server(setting: Setting):
-    
-    if setting.minio.enable == False:
-        logger.info("Disable MinIO storage server, skip the initialization.")
-        return None
-    
-    access_key: str = environ.get("MINIO_ACCESS_KEY", "")
-    secret_key: str = environ.get("MINIO_SECRET_KEY", "")
-
-    client: Minio = Minio(setting.minio.endpoint, access_key=access_key, secret_key=secret_key, secure=False)
-
-    try:
-        client.bucket_exists("notexistbucket")
-        logger.info("MinIO connect successfully.")
-        return client
-    except:
-        logger.error(traceback.format_exc())
-        logger.error("MinIO connect failed.")
-        return None
 
 
 class FlaskThread(threading.Thread):

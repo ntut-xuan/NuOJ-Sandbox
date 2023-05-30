@@ -125,8 +125,8 @@ def app():
                 }
             },
             "minio": {
-                "enable": False,
-                "endpoint": ""
+                "enable": True,
+                "endpoint": "minio:9000"
             }
         })
         _create_storage_folder(storage_path)
