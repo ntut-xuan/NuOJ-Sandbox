@@ -61,13 +61,14 @@ def _initialize_minio_storage_server(setting: Setting):
     access_key: str = environ.get("MINIO_ACCESS_KEY", "")
     secret_key: str = environ.get("MINIO_SECRET_KEY", "")
 
-    client: Minio = Minio(setting.minio.endpoint, access_key=access_key, secret_key=secret_key)
+    client: Minio = Minio(setting.minio.endpoint, access_key=access_key, secret_key=secret_key, secure=False)
 
     try:
         client.bucket_exists("notexistbucket")
         logger.info("MinIO connect successfully.")
         return client
     except:
+        logger.error(traceback.format_exc())
         logger.error("MinIO connect failed.")
         return None
 
