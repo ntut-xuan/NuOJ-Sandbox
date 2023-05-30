@@ -18,8 +18,8 @@ def heartbeat() -> bool:
     client = Minio(endpoint=ENDPOINT, access_key=ACCESS_KEY, secret_key=SECRET_KEY, secure=False)
 
     try:
-        print(format_exc())
         client.bucket_exists("notexistbucket")
         return True
     except:
+        print(format_exc())
         return False
