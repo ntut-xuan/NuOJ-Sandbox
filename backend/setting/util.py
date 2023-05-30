@@ -42,10 +42,18 @@ class CompilerSetting:
         command = command.replace("{dist}", self.file_name[type]["dist"])
         return command
 
+
+@dataclass
+class MinIOConfig:
+    enable: bool
+    endpoint: str
+
+
 @dataclass
 class Setting:
     sandbox_number: int
     compiler: dict[str, CompilerSetting]
+    minio: MinIOConfig
 
 
 class SettingBuilder:
@@ -58,7 +66,8 @@ class SettingBuilder:
     def from_mapping(self, mapping: dict[str, str]) -> Setting:
         return Setting(
             sandbox_number=mapping["sandbox_number"],
-            compiler=convert_compiler_dict_to_compiler_setting_object(mapping["compiler"])
+            compiler=convert_compiler_dict_to_compiler_setting_object(mapping["compiler"]),
+            minio=MinIOConfig(**mapping["minio"])
         )
 
 
