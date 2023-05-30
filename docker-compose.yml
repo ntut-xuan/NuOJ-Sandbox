@@ -17,6 +17,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - NUOJ_SANDBOX_ENABLE_CG=${NUOJ_SANDBOX_ENABLE_CG}
+      - MINIO_ACCESS_KEY=root
+      - MINIO_SECRET_KEY=@nuoj2023
     privileged: true
     depends_on:
       - sandbox
