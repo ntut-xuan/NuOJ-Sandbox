@@ -47,7 +47,7 @@
         }
     },
     "minio": {
-        "enable": true,
+        "enable": false,
         "endpoint": "minio:9090"
     }
 }
