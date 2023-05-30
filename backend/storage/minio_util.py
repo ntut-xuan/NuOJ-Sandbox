@@ -1,4 +1,5 @@
 from os import environ
+from traceback import format_exc
 from typing import Final
 
 from minio import Minio
@@ -17,6 +18,7 @@ def heartbeat() -> bool:
     client = Minio(endpoint=ENDPOINT, access_key=ACCESS_KEY, secret_key=SECRET_KEY, secure=False)
 
     try:
+        print(format_exc())
         client.bucket_exists("notexistbucket")
         return True
     except:
