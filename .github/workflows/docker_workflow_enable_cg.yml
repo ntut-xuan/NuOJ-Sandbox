@@ -27,7 +27,9 @@ jobs:
       run: docker compose config
 
     - name: Start containers
-      run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
+      run: |
+        docker compose up --build minio-test
+        docker compose up --build --exit-code-from "sandbox-test" sandbox-test
 
     - name: Stop containers
       if: always()
