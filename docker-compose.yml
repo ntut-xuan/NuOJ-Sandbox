@@ -21,4 +21,13 @@ services:
     working_dir: /etc/nuoj-sandbox/backend
     command:
       python3 -m pytest --no-header -vv ./tests/ --cov
-  
+  minio-test:
+    image: minio/minio
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=@nuoj2023
+    command: minio server /data --console-address ":9090"
+    ports:
+      - 9000:9000
+      - 9090:9090
