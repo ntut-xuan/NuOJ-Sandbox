@@ -24,6 +24,9 @@ class CompilerSetting:
 
     def get_checker_compile_command(self):
         return self.replace_parameter_in_command(self.compile, "checker")
+    
+    def get_checker_execute_command(self):
+        return self.replace_parameter_in_command(self.execute, "checker")
 
     def get_source_filename(self, type: str):
         if type not in self.file_name:
@@ -39,18 +42,10 @@ class CompilerSetting:
         command = command.replace("{dist}", self.file_name[type]["dist"])
         return command
 
-
-@dataclass
-class MinIOConfig:
-    enable: bool
-    endpoint: str
-
-
 @dataclass
 class Setting:
     sandbox_number: int
     compiler: dict[str, CompilerSetting]
-    minio: MinIOConfig
 
 
 class SettingBuilder:
@@ -63,8 +58,7 @@ class SettingBuilder:
     def from_mapping(self, mapping: dict[str, str]) -> Setting:
         return Setting(
             sandbox_number=mapping["sandbox_number"],
-            compiler=convert_compiler_dict_to_compiler_setting_object(mapping["compiler"]),
-            minio=MinIOConfig(**mapping["minio"])
+            compiler=convert_compiler_dict_to_compiler_setting_object(mapping["compiler"])
         )
 
 

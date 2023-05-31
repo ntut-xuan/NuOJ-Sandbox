@@ -13,7 +13,7 @@ class TestTaskRunning:
     def test_with_test_task_should_change_the_task_status(self, app: Flask, cleanup_test_sandbox: None, test_task: Task):
         with app.app_context():
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -23,7 +23,7 @@ class TestTaskRunning:
     def test_with_test_task_should_have_running_timestamp(self, app: Flask, cleanup_test_sandbox: None, test_task: Task):
         with app.app_context():
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -43,7 +43,7 @@ class TestTaskRunning:
         with app.app_context():
             test_task.execute_type = ExecuteType.EXECUTE.value
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -53,7 +53,7 @@ class TestTaskRunning:
     def test_judge_with_test_task_should_return_result(self, app: Flask, cleanup_test_sandbox: None, test_task: Task):
         with app.app_context():
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -67,7 +67,7 @@ class TestTaskRunning:
         with app.app_context():
             test_task.execute_type = "Invalid_type"
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -78,7 +78,7 @@ class TestStatus:
     def test_with_valid_codes_should_return_ac_status(self, app: Flask, cleanup_test_sandbox: None, test_task: Task):
         with app.app_context():
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -94,7 +94,7 @@ class TestStatus:
     def test_with_valid_codes_should_return_message_ok(self, app: Flask, cleanup_test_sandbox: None, test_task: Task):
         with app.app_context():
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -104,7 +104,7 @@ class TestStatus:
     def test_with_valid_codes_should_return_correct_compile_detail_info(self, app: Flask, cleanup_test_sandbox: None, test_task: Task):
         with app.app_context():
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -121,7 +121,7 @@ class TestStatus:
         with app.app_context():
             test_task.solution_code.code = wrong_syntax_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -134,7 +134,7 @@ class TestStatus:
         with app.app_context():
             test_task.solution_code.code = wrong_syntax_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -150,7 +150,7 @@ class TestStatus:
         with app.app_context():
             test_task.checker_code.code = wrong_syntax_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -163,7 +163,7 @@ class TestStatus:
         with app.app_context():
             test_task.checker_code.code = wrong_syntax_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -180,7 +180,7 @@ class TestStatus:
         with app.app_context():
             test_task.user_code.code = wrong_syntax_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -193,7 +193,7 @@ class TestStatus:
         with app.app_context():
             test_task.user_code.code = wrong_syntax_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -211,7 +211,7 @@ class TestStatus:
         with app.app_context():
             test_task.solution_code.code = runtime_error_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -226,7 +226,7 @@ class TestStatus:
         with app.app_context():
             test_task.solution_code.code = timeout_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -240,7 +240,7 @@ class TestStatus:
         with app.app_context():
             test_task.user_code.code = runtime_error_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -255,7 +255,7 @@ class TestStatus:
         with app.app_context():
             test_task.user_code.code = timeout_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -270,7 +270,7 @@ class TestStatus:
         with app.app_context():
             test_task.user_code.code = wrong_answer_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -285,7 +285,7 @@ class TestStatus:
         with app.app_context():
             test_task.checker_code.code = checker_timed_out_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -300,7 +300,7 @@ class TestStatus:
         with app.app_context():
             test_task.checker_code.code = checker_runtime_error_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -315,7 +315,7 @@ class TestStatus:
         with app.app_context():
             test_task.solution_code.code = memoryout_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -330,7 +330,7 @@ class TestStatus:
         with app.app_context():
             test_task.user_code.code = memoryout_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             
@@ -345,7 +345,7 @@ class TestStatus:
         with app.app_context():
             test_task.checker_code.code = checker_memory_out_code
             initialize_task(test_task, 0)
-            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task.test_case, 0)
             
             run_task(test_task, test_task.test_case, 0)
             

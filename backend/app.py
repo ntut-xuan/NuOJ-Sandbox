@@ -13,6 +13,7 @@ from api.judge.util import execute_queueing_task_when_exist_empty_box
 from api.result.route import result_api_bp
 from api.system.route import system_api_bp
 from api.test.route import test_bp
+from api.test_case.route import test_case_api_bp
 from setting.util import Setting, SettingBuilder
 
 from flask import Flask, current_app
@@ -39,6 +40,7 @@ def create_app(config_mapping: dict[str, str] = None) -> Flask:
     app.register_blueprint(result_api_bp)
     app.register_blueprint(system_api_bp)
     app.register_blueprint(test_bp)
+    app.register_blueprint(test_case_api_bp)
 
     pop_work_timer = FlaskThread(app, target=execute_queueing_task_when_exist_empty_box)
     pop_work_timer.daemon = True
