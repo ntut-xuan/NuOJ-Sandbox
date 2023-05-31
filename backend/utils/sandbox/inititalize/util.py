@@ -87,7 +87,7 @@ def _fetch_test_case_from_storage(filename: str) -> list[str]:
 
 
 def _prepare_testcase_to_storage_directory(filename: str) -> bool:
-    if is_file_exists(filename, TunnelCode.TESTCASE):
+    if is_file_exists(f"{filename}.json", TunnelCode.TESTCASE):
         return True
     
     setting: Setting = current_app.config["setting"]
