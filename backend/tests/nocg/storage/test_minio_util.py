@@ -45,10 +45,14 @@ def _upload_the_file(app: Flask, storage_client: Minio) -> None:
         file.seek(0)
         assert file.read() == FILE_STRING.encode("utf-8")
         storage_client.fput_object(BUCKET_NAME, FILE_NAME, file.name)
-    
+
+
 def _delete_the_file(app: Flask, storage_client: Minio) -> None:
     with app.app_context():
         assert heartbeat()
+
+    if not storage_client.bucket_exists(BUCKET_NAME):
+        return
 
     storage_client.remove_object(BUCKET_NAME, FILE_NAME)
     
