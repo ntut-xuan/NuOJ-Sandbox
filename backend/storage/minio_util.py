@@ -40,3 +40,15 @@ def download(bucket_name: str, object_name: str, file_name: str) -> None:
     client.fget_object(bucket_name, object_name, file_name)
 
     logger.info(f"Fetch the file {object_name} from {bucket_name}.")
+
+
+def is_testcase_in_storage_server(bucket_name: str, object_name: str) -> bool:
+    assert heartbeat()
+
+    client: Minio = get_client()
+
+    try:
+        client.stat_object(bucket_name, object_name)
+        return True
+    except:
+        return False

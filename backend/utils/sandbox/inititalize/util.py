@@ -2,6 +2,10 @@ import json
 
 from flask import current_app
 
+from loguru import logger
+from setting.util import Setting
+from storage.util import is_file_exists, TunnelCode
+from storage.minio_util import download, is_testcase_in_storage_server
 from utils.sandbox.util import Task, TestCase, get_timestamp
 from utils.sandbox.enum import CodeType, StatusType, TestCaseType
 from utils.isolate.util import init_sandbox, touch_text_file, touch_text_file_by_file_name
@@ -62,6 +66,7 @@ def _initialize_testlib_to_sandbox(box_id: int) -> None:
 
 
 def _initialize_test_case_from_storage_and_return_last_index(filename: str, start_index: int, box_id: int) -> int:
+    assert _prepare_testcase_to_storage_directory(filename)
     test_case_list: list[str] = _fetch_test_case_from_storage(filename)
     for i in range(len(test_case_list)):
         touch_text_file_by_file_name(test_case_list[i], f"{i + start_index}.in", box_id)
@@ -79,3 +84,16 @@ def _fetch_test_case_from_storage(filename: str) -> list[str]:
     with open(f"{storage_path}/testcase/{filename}.json", "r") as f:
         json_object = json.loads(f.read())
     return json_object
+
+
+def _prepare_testcase_to_storage_directory(filename: str) -> bool:
+    if is_file_exists(f"{filename}.json", TunnelCode.TESTCASE):
+        return True
+    
+    setting: Setting = current_app.config["setting"]
+    if setting.minio.enable and is_testcase_in_storage_server("testcase", filename):
+        storage_path: str = current_app.config["STORAGE_PATH"]
+        download("testcase", filename, f"{storage_path}/testcase/{filename}.json")
+        return True
+    
+    return False
