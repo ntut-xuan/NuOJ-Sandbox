@@ -45,5 +45,9 @@
                 "memory_limit": 131072
             }
         }
+    },
+    "minio": {
+        "enable": true,
+        "endpoint": "minio:9000"
     }
 }

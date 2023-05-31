@@ -123,6 +123,10 @@ def app():
                         "memory_limit": 131072
                     }
                 }
+            },
+            "minio": {
+                "enable": True,
+                "endpoint": "minio:9000"
             }
         })
         _create_storage_folder(storage_path)

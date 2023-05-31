@@ -18,7 +18,7 @@ def run_task(task: Task, test_case: list[str], box_id: int):
             "report": []
         }
         report = []
-        for i in range(len(task.test_case)):
+        for i in range(task.test_case_size):
             execute_meta_data = execute_code(CodeType.SUBMIT, task.user_code.compiler, task.options, i, box_id)
             report.append(execute_meta_data)
         result["report"] = report
@@ -59,7 +59,7 @@ def _judge_code(task: Task, box_id: int):
 
     result["judge_detail"]: list[dict[str, Any]] = []
 
-    for i in range(len(task.test_case)):
+    for i in range(task.test_case_size):
         execute_result: dict[str, Any] = _execute_testcase(task, i, box_id)
         result["judge_detail"].append(execute_result)
         
