@@ -132,7 +132,7 @@ class TestInitializeTestCase:
         with app.app_context():
             init_sandbox(0)
         
-            initialize_test_case_to_sandbox(test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
         
         assert Path("/var/local/lib/isolate/0/box/1.in").exists()
         assert Path("/var/local/lib/isolate/0/box/2.in").exists()
@@ -142,7 +142,7 @@ class TestInitializeTestCase:
         with app.app_context():
             init_sandbox(0)
         
-            initialize_test_case_to_sandbox(test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
             
             assert Path("/var/local/lib/isolate/0/box/1.in").exists()
             assert Path("/var/local/lib/isolate/0/box/2.in").exists()
@@ -154,7 +154,7 @@ class TestInitializeTestCase:
         with app.app_context():
             init_sandbox(0)
         
-            initialize_test_case_to_sandbox(test_task.test_case, 0)
+            initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
             
             assert Path("/var/local/lib/isolate/0/box/1.in").exists()
             assert Path("/var/local/lib/isolate/0/box/2.in").exists()
