@@ -147,8 +147,10 @@ def get_execute_command(type, compiler: str):
     if type == CodeType.SUBMIT.value:
         return compiler_settings[compiler].get_submit_code_execute_command()
     
-    return compiler_settings[compiler].get_solution_execute_command()
+    if type == CodeType.SOLUTION.value:
+        return compiler_settings[compiler].get_solution_execute_command()
     
+    return compiler_settings[compiler].get_checker_execute_command()
 
 
 def init_sandbox(box_id=0):

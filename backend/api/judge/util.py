@@ -46,7 +46,6 @@ def execute_task_with_specific_tracker_id(tracker_id):
         user_code=CodePackage(**submission_data["user_code"]),
         execute_type=submission_data["execute_type"],
         test_case=[TestCase(**test_case[i]) for i in range(len(test_case))],
-        test_case_size=0,
         options=Option(**submission_data["options"])
     )
     test_case: list[TestCase] = task.test_case
@@ -60,7 +59,7 @@ def execute_task_with_specific_tracker_id(tracker_id):
 
     # Execute the task
     initialize_task(task, box_id)
-    initialize_test_case_to_sandbox(task, test_case, box_id)
+    initialize_test_case_to_sandbox(test_case, box_id)
     run_task(task, test_case, box_id)
     finish_task(task)
 
