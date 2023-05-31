@@ -166,5 +166,5 @@ class TestInitializeTestCase:
         with app.app_context():
             init_sandbox(0)
         
-            with pytest.raises(Exception):
-                initialize_test_case_to_sandbox(test_task.test_case, 0)
+            with pytest.raises(AssertionError):
+                initialize_test_case_to_sandbox(test_task, test_task.test_case, 0)
