@@ -17,7 +17,7 @@ def initialize_task(task: Task, box_id: int) -> None:
     _initialize_code(task, box_id)
 
 
-def initialize_test_case_to_sandbox(test_case_list: list[TestCase], box_id: int):
+def initialize_test_case_to_sandbox(task: Task, test_case_list: list[TestCase], box_id: int):
     index = 1
     for i in range(len(test_case_list)):
         test_case_object: TestCase = test_case_list[i]
@@ -25,7 +25,7 @@ def initialize_test_case_to_sandbox(test_case_list: list[TestCase], box_id: int)
             index = _initialize_test_case_from_storage_and_return_last_index(test_case_object.value, index, box_id)
         else:
             index = _initialize_test_case_from_plain_text_and_return_last_index(test_case_object.value, index, box_id)
-
+    task.test_case_size = index - 1
 
 def _initilize_sandbox(box_id: int) -> None:
     """
