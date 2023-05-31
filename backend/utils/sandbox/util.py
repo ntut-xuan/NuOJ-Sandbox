@@ -31,7 +31,7 @@ class Task:
     execute_type: ExecuteType
     options: Option
     test_case: list[TestCase]
-    test_case_size: int
+    test_case_size: int = 0
     flow: dict[str, Any] = field(default_factory=dict[str, Any])
     result: dict[str, Any] = field(default_factory=dict[str, Any])
     status: StatusType = StatusType.PENDING
