@@ -5,6 +5,8 @@ services:
     build: .
     environment:
       - NUOJ_SANDBOX_ENABLE_CG=${NUOJ_SANDBOX_ENABLE_CG}
+      - MINIO_ACCESS_KEY=root
+      - MINIO_SECRET_KEY=@nuoj2023
     tty: true
     privileged: true
     restart: always
@@ -15,10 +17,21 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - NUOJ_SANDBOX_ENABLE_CG=${NUOJ_SANDBOX_ENABLE_CG}
+      - MINIO_ACCESS_KEY=root
+      - MINIO_SECRET_KEY=@nuoj2023
     privileged: true
     depends_on:
       - sandbox
     working_dir: /etc/nuoj-sandbox/backend
     command:
       python3 -m pytest --no-header -vv ./tests/ --cov
-  
+  minio-test:
+    image: minio/minio
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=@nuoj2023
+    command: minio server /data --console-address ":9090"
+    ports:
+      - 9000:9000
+      - 9090:9090
