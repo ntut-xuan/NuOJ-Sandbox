@@ -24,9 +24,6 @@ class CompilerSetting:
 
     def get_checker_compile_command(self):
         return self.replace_parameter_in_command(self.compile, "checker")
-    
-    def get_checker_execute_command(self):
-        return self.replace_parameter_in_command(self.execute, "checker")
 
     def get_source_filename(self, type: str):
         if type not in self.file_name:
