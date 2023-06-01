@@ -55,10 +55,16 @@ thp_check() {
     fi
 }
 
-cgroup_check memory
-cgroup_check cpuacct
-cgroup_check cpuset
-echo "[   OK   ] CGroup v1"
+if "$NUOJ_SANDBOX_ENABLE_CG" -eq "1"; then 
+    cgroup_check memory
+    cgroup_check cpuacct
+    cgroup_check cpuset
+    echo "[   OK   ] CGroup v1"
+else 
+    echo "[  SKIP  ] CGroup v1"
+fi
+
+
 
 swap_check
 echo "[   OK   ] Swap"

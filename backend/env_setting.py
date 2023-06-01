@@ -39,7 +39,7 @@ def set_grub():
 
 def set_boot_task():
     if not subprocess.check_output( ["cat", "/proc/sys/kernel/randomize_va_space"] ).decode("utf-8") == "0\n" :
-        os.system("echo 'kernel.randomize_va_space = 0' >> /etc/sysfs.conf")
+        os.system("echo 'kernel.randomize_va_space = 0' >> /etc/sysctl.conf")
     if not subprocess.check_output(["cat", "/sys/kernel/mm/transparent_hugepage/enabled"]).decode("utf-8")== "always madvise [never]\n":
         os.system("echo 'kernel/mm/transparent_hugepage/enabled = never' >> /etc/sysfs.conf")
     if not subprocess.check_output(["cat", "/sys/kernel/mm/transparent_hugepage/defrag"]).decode("utf-8")== "always defer defer+madvise madvise [never]\n":
