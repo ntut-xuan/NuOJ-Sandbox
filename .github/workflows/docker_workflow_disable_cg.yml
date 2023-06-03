@@ -22,7 +22,7 @@ jobs:
         sudo echo "0" | sudo tee /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
         
     - name: Start containers
-      run: docker compose up --build --exit-code-from "sandbox-test" sandbox-test
+      run: docker compose up --build --force-recreate --exit-code-from "sandbox-test" sandbox-test
 
     - name: Stop containers
       if: always()

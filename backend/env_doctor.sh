@@ -55,7 +55,7 @@ thp_check() {
     fi
 }
 
-if [ "$NUOJ_SANDBOX_ENABLE_CG" -eq 1 ] ; then 
+if [ "$NUOJ_SANDBOX_ENABLE_CG" == "1" ] ; then 
     cgroup_check memory
     cgroup_check cpuacct
     cgroup_check cpuset
