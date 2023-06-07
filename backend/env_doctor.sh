@@ -64,8 +64,6 @@ else
     echo "[  SKIP  ] CGroup v1"
 fi
 
-
-
 swap_check
 echo "[   OK   ] Swap"
 
