@@ -174,7 +174,7 @@ class TestSubmit:
         response: TestResponse = client.post("/api/judge", json=payload)
         
         assert response.status_code == HTTPStatus.OK
-        assert response.json["result"]["judge_detail"][0]["verdict"] == "AC"  
+        assert response.json["data"]["judge_detail"][0]["verdict"] == "AC"  
         out, _ = capfd.readouterr()
         assert "send successfully" in out.split("\n")[-2]
 
@@ -185,7 +185,7 @@ class TestSubmit:
         response: TestResponse = client.post("/api/judge", json=payload)
         
         assert response.status_code == HTTPStatus.OK
-        assert response.json["result"]["compile_detail"]["submit"]["exitcode"] == "1"  
+        assert response.json["data"]["compile_detail"]["submit"]["exitcode"] == "1"  
         out, _ = capfd.readouterr()
         assert "has error that occur result" in out.split("\n")[-2]
 
