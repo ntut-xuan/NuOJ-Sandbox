@@ -34,6 +34,6 @@ def judge_route():
     response = {"status": "OK", "type": execution_type, "tracker_id": tracker_id}
 
     if not option["threading"]:
-        response["result"] = result
+        response["data"] = result
 
     return Response(json.dumps(response), mimetype="application/json")
