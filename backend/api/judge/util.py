@@ -30,7 +30,7 @@ def execute_queueing_task_when_exist_empty_box():
                 kwargs={"tracker_id": tracker_id},
             )
             thread.start()
-        time.sleep(1)
+        time.sleep(0.05)
 
 
 def execute_task_with_specific_tracker_id(tracker_id):
