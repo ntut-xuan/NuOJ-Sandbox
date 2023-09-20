@@ -98,6 +98,7 @@ def _send_webhook_with_webhook_url(task: Task, tracker_id: int):
             task.options.webhook_url,
             data=json.dumps({"status": "OK", "data": task.result}),
             headers={"content-type": "application/json"},
+            timeout=10
         )
         if resp.status_code != 200:
             print(f"webhook_url {task.options.webhook_url} has error that occur result {tracker_id} has error.")
