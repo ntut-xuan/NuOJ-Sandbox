@@ -96,7 +96,7 @@ def _send_webhook_with_webhook_url(task: Task, tracker_id: int):
     if task.options.webhook_url is not None:
         resp = requests.post(
             task.options.webhook_url,
-            data=json.dumps({"status": "OK", "data": task.result}),
+            data=json.dumps({"status": "OK", "data": task.result, "tracker_id": tracker_id}),
             headers={"content-type": "application/json"},
         )
         if resp.status_code != 200:
