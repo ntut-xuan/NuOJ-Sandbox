@@ -70,8 +70,8 @@ def execute_task_with_specific_tracker_id(tracker_id):
 
     # Free thread with release function.
     available_box.add(box_id)
-    semaphores.release()
     cleanup_sandbox(box_id)
+    semaphores.release()
     return task.result
 
 
