@@ -58,6 +58,9 @@ def execute_task_with_specific_tracker_id(tracker_id):
     semaphores.acquire()
     box_id = available_box.pop()
 
+    # Send debug serve webook url
+    _send_webhook_with_debug_webhook_initialize_url(task, tracker_id)
+
     # Execute the task
     initialize_task(task, box_id)
     initialize_test_case_to_sandbox(task, test_case, box_id)
@@ -104,6 +107,21 @@ def _send_webhook_with_webhook_url(task: Task, tracker_id: int):
             print(f"webhook_url {task.options.webhook_url} has error that occur result {tracker_id} has error.")
         else:
             print(f"webhook_url {task.options.webhook_url} send successfully.")
+
+
+def _send_webhook_with_debug_webhook_initialize_url(task: Task, tracker_id: int):
+    if task.options.debug_webhook_initialize_url is not None:
+        resp = requests.post(
+            task.options.debug_webhook_initialize_url,
+            data=json.dumps({"status": "OK", "tracker_id": tracker_id}),
+            headers={"content-type": "application/json"},
+            timeout=10
+        )
+        if resp.status_code != 200:
+            print(f"debug serve webhook_url {task.options.debug_webhook_initialize_url} has error that occur result {tracker_id} has error.")
+        else:
+            print(f"debug serve webhook_url {task.options.debug_webhook_initialize_url} send successfully.")
+
 
 class FlaskThread(threading.Thread):
     def __init__(self, *args, **kwargs) -> None:

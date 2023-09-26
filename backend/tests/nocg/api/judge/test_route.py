@@ -189,6 +189,17 @@ class TestSubmit:
         out, _ = capfd.readouterr()
         assert "has error that occur result" in out.split("\n")[-2]
 
+    def test_submit_with_debug_serve_url_should_print_successfully_message(self, client: FlaskClient, payload: dict[str, Any], capfd: Generator[pytest.CaptureFixture[str], None, None]):
+        payload["options"]["debug_webhook_initialize_url"] = "http://sandbox:4439/api/test/debug_webhook"
+        
+        response: TestResponse = client.post("/api/judge", json=payload)
+        
+        assert response.status_code == HTTPStatus.OK
+        assert response.json["data"]["compile_detail"]["submit"]["exitcode"] == "0"  
+        out, _ = capfd.readouterr()
+        assert "debug serve webhook_url" in out.split("\n")[0]
+        assert "send successfully" in out.split("\n")[0]
+
 
 def _wait_status_finished(client: FlaskClient, tracker_id: str):
     attempt: int = 0
