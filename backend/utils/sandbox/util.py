@@ -22,6 +22,7 @@ class Option:
     wall_time: float
     memory: int
     webhook_url: str | None = None
+    debug_webhook_initialize_url: str | None = None
 
 @dataclass
 class Task:
