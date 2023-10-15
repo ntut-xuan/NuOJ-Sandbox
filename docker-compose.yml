@@ -24,7 +24,7 @@ services:
       - sandbox
     working_dir: /etc/nuoj-sandbox/backend
     command:
-      python3 -m pytest --no-header -vv ./tests/ --cov
+      python3 -m pytest --no-header -vv --cov-config .coveragerc --cov . --cov-report xml
   minio-test:
     image: minio/minio
     container_name: minio
