@@ -1,0 +1,4 @@
+ignore:
+  - "./backend/env_setting.py"
+  - "./backend/config.py"
+  - "./tests/**/*.py"
