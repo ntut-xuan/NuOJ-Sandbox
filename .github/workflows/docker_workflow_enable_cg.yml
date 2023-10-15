@@ -30,7 +30,7 @@ jobs:
       run: docker compose up --build --exit-code-from "sandbox-test" minio-test sandbox-test
 
     - name: Copy Test Report
-      run: docker cp nuoj-sandbox-sandbox-test-1 /etc/nuoj-sandbox/backend/coverage.xml coverage.xml
+      run: docker cp nuoj-sandbox-sandbox-test-1:/etc/nuoj-sandbox/backend/coverage.xml coverage.xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
