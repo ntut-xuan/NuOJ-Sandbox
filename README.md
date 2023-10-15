@@ -1,5 +1,7 @@
 # NuOJ - Sandbox
 
+[![codecov](https://codecov.io/gh/ntut-xuan/NuOJ-Sandbox/graph/badge.svg?token=UVQXFQDTCK)](https://codecov.io/gh/ntut-xuan/NuOJ-Sandbox)
+
 ## Introduction
 
 The sandbox system based on [Isolate by IOI](https://github.com/ioi/isolate) for [Nu Online Judge](https://github.com/ntut-xuan/NuOJ).
