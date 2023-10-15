@@ -29,6 +29,14 @@ jobs:
     - name: Start containers
       run: docker compose up --build --exit-code-from "sandbox-test" minio-test sandbox-test
 
+    - name: Copy Test Report
+      run: docker cp nuoj-sandbox-sandbox-test-1 /etc/nuoj-sandbox/backend/coverage.xml coverage.xml
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
     - name: Stop containers
       if: always()
       run: docker compose down -v
