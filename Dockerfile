@@ -4,7 +4,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN sed 's@archive.ubuntu.com@free.nchc.org.tw@' -i /etc/apt/sources.list
 # apt update
 RUN apt-get update
-RUN apt-get install -y python3 python3-pip git build-essential libcap-dev golang
+RUN apt-get install -y python3 python3-pip git build-essential libcap-dev golang libsystemd-dev
 # set env
 ENV PYTHONUNBUFFERED=0
 # mkdir
