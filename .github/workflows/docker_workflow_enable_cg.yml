@@ -10,11 +10,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Check Control Group
-      run: |
-        cd /sys/fs/cgroup/memory
-        ls
-    
     - name: Disable SWAP ASLR THS
       run: |
         sudo swapoff -a
