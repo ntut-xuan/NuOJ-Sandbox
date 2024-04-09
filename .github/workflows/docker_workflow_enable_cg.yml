@@ -3,7 +3,7 @@ on: push
 jobs:
   docker:
     timeout-minutes: 10
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       NUOJ_SANDBOX_ENABLE_CG: 1
     steps:
